@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { ResponsiveImageSources } from "@shared/types/media";
 import {
@@ -17,6 +17,7 @@ import {
 import { adminResourceKeys, useAdminResource } from "@/hooks/useAdminResource";
 import { admin, api, resolveCmsMediaUrl } from "@/lib/routes";
 import { cn } from "@/lib/utils";
+import { DeveloperMediaPreviewDialog } from "./DeveloperMediaPreviewDialog";
 import {
   DeveloperField,
   DeveloperMessage,
@@ -464,6 +465,8 @@ export function DeveloperMediaPreview({
   align?: "start" | "center";
 }) {
   const [previewOpen, setPreviewOpen] = useState(false);
+  const previewTriggerRef = useRef<HTMLButtonElement>(null);
+  const closePreview = useCallback(() => setPreviewOpen(false), []);
   const trimmedValue = value.trim();
   const currentType =
     trimmedValue.length > 0 ? mediaTypeFromUrl(trimmedValue) : mediaType === "video" ? "video" : "image";
@@ -479,8 +482,11 @@ export function DeveloperMediaPreview({
           {hasPreview ? (
             <div className="relative">
               <button
+                ref={previewTriggerRef}
                 type="button"
                 onClick={() => setPreviewOpen(true)}
+                aria-haspopup="dialog"
+                aria-label={`Ampliar ${previewAlt ?? "mídia selecionada"}`}
                 className="group block w-full text-left focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               >
               <div className={cn("relative overflow-hidden bg-slate-950", compact ? "h-28" : "h-40")}>
@@ -531,49 +537,9 @@ export function DeveloperMediaPreview({
       </div>
 
       {hasPreview && previewOpen ? (
-        <div className="cms-content-dialog fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/76 p-4">
-          <button
-            type="button"
-            aria-label="Fechar preview"
-            className="absolute inset-0 cursor-default"
-            onClick={() => setPreviewOpen(false)}
-          />
-          <div className="relative z-10 max-w-[92vw] rounded-[22px] border border-white/16 bg-white p-3 shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
-            <div className="mb-3 flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-[var(--foreground)]">
-                Preview da mídia
-              </p>
-              <button
-                type="button"
-                onClick={() => setPreviewOpen(false)}
-                className={cn(
-                  developerGhostButtonClassName,
-                  "min-h-9 rounded-xl px-3 py-2 text-xs"
-                )}
-              >
-                Fechar
-              </button>
-            </div>
-            {currentType === "video" ? (
-              <video
-                src={previewUrl}
-                controls
-                autoPlay
-                muted
-                className="max-h-[78vh] max-w-[86vw] rounded-[16px] bg-slate-950 object-contain"
-              />
-            ) : (
-              <img
-                src={previewUrl}
-                alt={previewAlt ?? "Preview da mídia selecionada"}
-                className="max-h-[78vh] max-w-[86vw] rounded-[16px] object-contain"
-              />
-            )}
-            <p className="mt-3 max-w-[86vw] break-all text-xs leading-5 text-[var(--color-muted-raw)]">
-              {trimmedValue}
-            </p>
-          </div>
-        </div>
+        <DeveloperMediaPreviewDialog key={previewUrl} src={previewUrl} reference={trimmedValue}
+          alt={previewAlt ?? "Preview da mídia selecionada"} mediaType={currentType}
+          trigger={previewTriggerRef.current} onClose={closePreview} />
       ) : null}
     </>
   );

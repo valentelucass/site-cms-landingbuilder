@@ -4,11 +4,12 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync,
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { setTimeout as delay } from "node:timers/promises";
+import { testMediaPreview } from "./test-media-preview.mjs";
 
-// Usa apenas um DEV já iniciado manualmente. Toda API é interceptada antes de chegar ao backend.
+// DEV já iniciado manualmente ou artefato isolado pelo runner. APIs nunca chegam ao backend.
 const frontend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const origin = new URL(process.env.CMS_NOTIFICATION_TEST_URL ?? "http://127.0.0.1:35013");
-assert(["localhost", "127.0.0.1"].includes(origin.hostname) && origin.port === "35013" && origin.protocol === "http:", "Use somente o DEV local do CMS na porta 35013.");
+assert(["localhost", "127.0.0.1"].includes(origin.hostname) && origin.port === (process.env.CMS_UI_ISOLATED_TEST === "1" ? "42513" : "35013") && origin.protocol === "http:", "Use o DEV local do CMS (35013) ou o runner isolado (42513).");
 await fetch(new URL("/admin/auth/entrar", origin), { signal: AbortSignal.timeout(20000) });
 const browserPath = process.env.CMS_TEST_BROWSER_PATH ?? [
   "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
@@ -54,6 +55,7 @@ try {
   let saveFails = false;
   let saves = 0;
   let uploaded = false;
+  const mediaFixture = { url: "/uploads/notification-test.png", width: 1600, height: 2400, fail: false, paused: false };
   const homePage = JSON.parse(readFileSync(path.resolve(frontend, "../../site/backend/storage/content.json"), "utf8")).homePage;
   let items = [{ id: "notification-fixture", order: 1, title: "Certificação de teste", alt: "Logo de teste", image: "" }];
   const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
@@ -68,7 +70,7 @@ try {
         assert.equal(request.method, "POST");
         assert.equal(request.headers["X-CSRF-Token"] ?? request.headers["x-csrf-token"], "notification-test-only");
         uploaded = true;
-        return fulfill({ image: { id: "test-image", url: "/uploads/notification-test.png", name: "logo-teste.png", mediaType: "image" } });
+        return fulfill({ image: { id: "test-image", url: mediaFixture.url, name: "logo-teste.png", mediaType: "image" } });
       }
       if (url.pathname === "/api/admin/home/certifications") {
         if (request.method === "PUT") {
@@ -80,7 +82,12 @@ try {
       }
       return fulfill({ items: [], images: [] });
     }
-    if (url.pathname.startsWith("/uploads/")) return cdp("Fetch.fulfillRequest", { requestId, responseCode: 200, responseHeaders: [{ name: "Content-Type", value: "image/png" }], body: png });
+    if (url.pathname.startsWith("/uploads/")) {
+      await until(() => !mediaFixture.paused, "liberar mídia simulada");
+      if (mediaFixture.fail) return fulfill("", 404, "text/plain");
+      // Fixture de dimensões grandes sem ler arquivos privados ou enviar mídia ao backend.
+      return fulfill(`<svg xmlns="http://www.w3.org/2000/svg" width="${mediaFixture.width}" height="${mediaFixture.height}"><rect width="100%" height="100%" fill="#dbeafe"/><rect x="8" y="8" width="${mediaFixture.width - 16}" height="${mediaFixture.height - 16}" fill="none" stroke="#1d4ed8" stroke-width="16"/><text x="50%" y="50%" text-anchor="middle" fill="#172554" font-size="80">CMS ${mediaFixture.width} × ${mediaFixture.height}</text></svg>`, 200, "image/svg+xml");
+    }
     // Previews públicos e recursos externos não participam desta regressão nem recebem requisições.
     if (url.origin !== origin.origin || (resourceType === "Document" && !url.pathname.startsWith("/admin/"))) return fulfill("", 200, "text/html");
     if (!["GET", "HEAD"].includes(request.method)) throw new Error("Mutação não interceptada: teste abortado.");
@@ -157,6 +164,7 @@ try {
   await evaluate(`${save}.scrollIntoView({block:'center'})`);
   const scrollBefore = await evaluate(`${query("[data-admin-scroll]")}.scrollTop`);
   assert(scrollBefore > 0, "O teste exige a página rolada.");
+  assert(await evaluate(`!${query('[aria-label="Ampliar Logo de teste"]')}`), "Uma seleção vazia não deve oferecer ampliação.");
 
   await evaluate(`(() => { const input = document.querySelector('input[type=file][accept*=image]'); const transfer = new DataTransfer(); transfer.items.add(new File([Uint8Array.from(atob('${png}'), c => c.charCodeAt(0))], 'logo-teste.png', { type: 'image/png' })); input.files = transfer.files; input.dispatchEvent(new Event('change', { bubbles: true })); })()`);
   await waitNotice("success", "Logo enviado");
@@ -168,9 +176,19 @@ try {
   await until(() => evaluate(`!${query(notice)}`), "fechar aviso");
   assert.equal(saves, 0, "Fechar aviso submeteu o formulário.");
 
+  async function selectPreviewFixture(url) {
+    mediaFixture.url = url;
+    await evaluate(`(() => { const input = document.querySelector('input[type=file][accept*=image]'); const transfer = new DataTransfer(); transfer.items.add(new File([Uint8Array.from(atob('${png}'), c => c.charCodeAt(0))], 'logo-teste.png', { type: 'image/png' })); input.files = transfer.files; input.dispatchEvent(new Event('change', { bubbles: true })); })()`);
+    await waitNotice("success", "Logo enviado");
+    await evaluate(`${query(".cms-notification__close")}.click()`);
+    await until(() => evaluate(`!${query(notice)} && ${query('[aria-label="Ampliar Logo de teste"] img')}?.getAttribute('src')?.endsWith(${JSON.stringify(url)})`), "selecionar fixture de mídia");
+  }
+  await testMediaPreview({ cdp, evaluate, until, screenshot, mediaFixture, selectPreviewFixture });
+  assert.equal(saves, 0, "Ampliar ou fechar a mídia submeteu o formulário.");
+
   await evaluate(`${save}.click()`);
   await waitNotice("success", "Certificações salvas");
-  assert.equal(items[0].image, "/uploads/notification-test.png");
+  assert.equal(items[0].image, mediaFixture.url);
   const firstId = await evaluate(`${query(".cms-notification__text")}.id`);
   await evaluate(`${save}.click()`);
   await waitNotice("success", "Certificações salvas");
@@ -189,6 +207,17 @@ try {
   assert(await evaluate(`Boolean(${query(".cms-notification [role=alert]")})`));
   await delay(8500);
   assert(await evaluate(`Boolean(${query(notice)})`), "Erro não deve sumir automaticamente.");
+  await evaluate(`${query('[aria-label="Ampliar Logo de teste"]')}.click()`);
+  await until(() => evaluate(`Boolean(${query('[data-media-preview-dialog="true"]')})`), "abrir ampliação sob notificação");
+  await assertVisible(1920);
+  await evaluate(`${query(".cms-notification__close")}.focus()`);
+  await cdp("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape" });
+  await until(() => evaluate(`!${query(notice)}`), "fechar somente o aviso sobre a ampliação");
+  assert(await evaluate(`Boolean(${query('[data-media-preview-dialog="true"]')})`), "Escape da notificação fechou a ampliação.");
+  await cdp("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape" });
+  await until(() => evaluate(`!${query('[data-media-preview-dialog="true"]')}`), "fechar ampliação após aviso");
+  await evaluate(`${save}.click()`);
+  await waitNotice("error", "Falha de teste");
   await evaluate(`${query('[aria-label^="Trocar mídia:"]')}.click()`);
   await until(() => evaluate(`Boolean(${query('[data-media-library-dialog="true"]')})`), "abrir biblioteca sobre o editor");
   await assertVisible(1920);

@@ -9,7 +9,8 @@
     "start": "next start --hostname 127.0.0.1 --port 35013",
     "start:prod": "node dist-prod/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test:notifications": "node scripts/test-notifications.mjs"
+    "test:notifications": "node scripts/test-notifications.mjs",
+    "test:ui:isolated": "node scripts/test-ui-isolated.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

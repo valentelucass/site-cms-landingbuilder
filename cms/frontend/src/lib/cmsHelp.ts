@@ -333,6 +333,7 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
       { label: "Onde aparece", value: "Na faixa “Certificações que reforçam nossa operação”, entre as seções Previsibilidade e Operação conectada da Página Inicial (/)." },
       { label: "Envio direto", value: "Use Enviar logo para mandar PNG, JPG, WebP ou AVIF de até 8 MB. A prévia e o nome do arquivo trocam imediatamente; enquanto aparece “enviando e otimizando”, o CMS valida o arquivo real e gera as versões WebP. Ao terminar, o logo otimizado fica selecionado neste mesmo card." },
       { label: "Biblioteca", value: "Clique no campo que mostra “Nenhuma mídia selecionada” ou o nome atual do arquivo para abrir as imagens internas já enviadas. Links externos, data URLs e caminhos manuais não são aceitos." },
+      { label: "Ampliar", value: "Abre o logo inteiro, sem recortar, ajustado ao espaço da tela. Use Fechar, Escape ou clique fora da janela para voltar ao mesmo ponto do formulário. Se a mídia não carregar, use Tentar novamente. Ampliar não altera o arquivo nem salva as certificações." },
       { label: "Coleção", value: "Cada card é independente: você pode adicionar, ordenar ou excluir certificações. Ao remover um card, ele deixa de aparecer na Home depois de salvar." },
       { label: "Proteção", value: "A referência gravada é sempre uma imagem interna validada; o arquivo enviado continua administrado pela Biblioteca de imagens.", technical: true },
     ],
@@ -1031,7 +1032,7 @@ function getFieldFallback(label: string, context: CmsHelpContext): Omit<CmsHelpC
     return {
       summary: `Aqui você escolhe a mídia mostrada em ${context.destination}. Salvar troca a imagem ou vídeo apenas no bloco que está aberto.`,
       example: "Exemplo: escolha uma foto de caminhão em operação na Biblioteca de mídia para representar este bloco.",
-      details: [...baseDetails, { label: "Onde aparece", value: `Na área visual ligada a este campo em ${context.destination}.` }, { label: "Após salvar", value: "A mídia anterior desse bloco é substituída; as demais não mudam." }],
+      details: [...baseDetails, { label: "Onde aparece", value: `Na área visual ligada a este campo em ${context.destination}.` }, { label: "Ampliar", value: "Mostra a mídia inteira ajustada à tela, sem alterar a seleção nem salvar. Feche pelo botão Fechar, pela tecla Escape ou clicando fora da janela. Se o carregamento falhar, use Tentar novamente." }, { label: "Após salvar", value: "A mídia anterior desse bloco é substituída; as demais não mudam." }],
     };
   }
   if (normalizedLabel.includes("cor")) {
