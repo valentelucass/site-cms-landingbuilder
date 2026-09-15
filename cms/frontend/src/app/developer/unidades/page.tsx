@@ -7,7 +7,6 @@ import {
   CheckCircle,
   MapPinLine,
   PencilSimple,
-  Plus,
   SortAscending,
   Trash,
   X,
@@ -17,14 +16,13 @@ import { useCarouselPagination } from "@/hooks/useCarouselPagination";
 import { DeveloperConfirmButton } from "@/components/developer/DeveloperConfirmButton";
 import {
   DeveloperCard,
+  DeveloperCarouselPagination,
   DeveloperField,
   DeveloperHero,
-  DeveloperCarouselPagination,
   DeveloperMessage,
   DeveloperPage,
   DeveloperSectionHeading,
   DeveloperStatusPill,
-  developerSplitLayoutClassName,
   developerGhostButtonClassName,
   developerInputClassName,
   developerPrimaryButtonClassName,
@@ -110,7 +108,7 @@ export default function UnidadesPage() {
   const [saving, setSaving] = useState(false);
   const notify = useDeveloperNotifier();
   const { pages, currentPage, totalPages, nextPage, prevPage } =
-    useCarouselPagination(items, 3);
+    useCarouselPagination(items, 4);
 
   function resetForm() {
     setEditingId(null);
@@ -224,22 +222,23 @@ export default function UnidadesPage() {
         ]}
       />
 
-      <section className={developerSplitLayoutClassName}>
+      <section className="space-y-6">
         <DeveloperCard>
           <DeveloperSectionHeading
             eyebrow={editingId ? "Edicao" : "Nova unidade"}
             title={editingId ? "Atualizar unidade" : "Cadastrar unidade"}
-            description="Use UF com duas letras; depois selecione este registro na Presença Regional da Página Inicial para publicar um snapshot no mapa."
+            description="Use UF com duas letras e selecione este registro na Presença Regional da Página Inicial para publicá-lo no mapa."
+            className="mb-3"
           />
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <fieldset className="space-y-3 border-b border-[var(--border)]/75 pb-4">
-              <legend className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
+          <form className="space-y-3 [&_label>span:first-child]:mb-1" onSubmit={handleSubmit}>
+            <fieldset className="space-y-2 border-b border-[var(--border)]/75 pb-3">
+              <legend className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
                 Identificação e localização
               </legend>
 
-              <div className="grid gap-x-4 gap-y-3 md:grid-cols-12">
-                <DeveloperField label="Nome da unidade" required className="md:col-span-8">
+              <div className="grid gap-x-3 gap-y-2 lg:grid-cols-12">
+                <DeveloperField label="Nome da unidade" required className="lg:col-span-4">
                   <input
                     required
                     value={form.name}
@@ -251,7 +250,7 @@ export default function UnidadesPage() {
                   />
                 </DeveloperField>
 
-                <DeveloperField label="Tipo" required className="md:col-span-4">
+                <DeveloperField label="Tipo" required className="lg:col-span-2">
                   <select
                     required
                     value={form.type}
@@ -268,7 +267,7 @@ export default function UnidadesPage() {
                   </select>
                 </DeveloperField>
 
-                <DeveloperField label="UF" required className="md:col-span-2">
+                <DeveloperField label="UF" required className="lg:col-span-1">
                   <select
                     required
                     value={form.state}
@@ -284,7 +283,7 @@ export default function UnidadesPage() {
                   </select>
                 </DeveloperField>
 
-                <DeveloperField label="Cidade" className="md:col-span-4">
+                <DeveloperField label="Cidade" className="lg:col-span-2">
                   <input
                     value={form.city}
                     onChange={(event) =>
@@ -295,7 +294,7 @@ export default function UnidadesPage() {
                   />
                 </DeveloperField>
 
-                <DeveloperField label="Endereço" required className="md:col-span-6">
+                <DeveloperField label="Endereço" required className="lg:col-span-3">
                   <input
                     required
                     value={form.address}
@@ -309,13 +308,13 @@ export default function UnidadesPage() {
               </div>
             </fieldset>
 
-            <fieldset className="space-y-3 border-b border-[var(--border)]/75 pb-4">
-              <legend className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
+            <fieldset className="space-y-2 border-b border-[var(--border)]/75 pb-3">
+              <legend className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
                 Contato e destino
               </legend>
 
-              <div className="grid gap-x-4 gap-y-3 md:grid-cols-12">
-                <DeveloperField label="Telefone" className="md:col-span-4">
+              <div className="grid gap-x-3 gap-y-2 lg:grid-cols-12">
+                <DeveloperField label="Telefone" className="lg:col-span-3">
                   <input
                     value={form.phone}
                     onChange={(event) =>
@@ -326,7 +325,7 @@ export default function UnidadesPage() {
                   />
                 </DeveloperField>
 
-                <DeveloperField label="E-mail" className="md:col-span-4">
+                <DeveloperField label="E-mail" className="lg:col-span-3">
                   <input
                     type="email"
                     value={form.email}
@@ -338,7 +337,7 @@ export default function UnidadesPage() {
                   />
                 </DeveloperField>
 
-                <DeveloperField label="E-mail adicional" required className="md:col-span-4">
+                <DeveloperField label="E-mail adicional" required className="lg:col-span-3">
                   <input
                     type="email"
                     required
@@ -351,7 +350,7 @@ export default function UnidadesPage() {
                   />
                 </DeveloperField>
 
-                <DeveloperField label="Link de contato" className="md:col-span-12">
+                <DeveloperField label="Link de contato" className="lg:col-span-3">
                   <input
                     value={form.contactUrl}
                     onChange={(event) =>
@@ -365,15 +364,15 @@ export default function UnidadesPage() {
               </div>
             </fieldset>
 
-            <fieldset className="space-y-3 border-b border-[var(--border)]/75 pb-4">
-              <legend className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
+            <fieldset className="space-y-2 border-b border-[var(--border)]/75 pb-3">
+              <legend className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
                 Informações exibidas
               </legend>
 
-              <div className="grid items-start gap-x-4 gap-y-3 md:grid-cols-2">
+              <div className="grid items-start gap-x-3 gap-y-2 md:grid-cols-2">
                 <DeveloperField label="Descrição">
                   <textarea
-                    rows={3}
+                    rows={2}
                     value={form.description}
                     onChange={(event) =>
                       setForm((current) => ({ ...current, description: event.target.value }))
@@ -385,7 +384,7 @@ export default function UnidadesPage() {
 
                 <DeveloperField label="Informação logística">
                   <textarea
-                    rows={3}
+                    rows={2}
                     value={form.logisticsInfo}
                     onChange={(event) =>
                       setForm((current) => ({
@@ -400,38 +399,38 @@ export default function UnidadesPage() {
               </div>
             </fieldset>
 
-            <fieldset className="space-y-3">
-              <legend className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
+            <fieldset className="space-y-2">
+              <legend className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
                 Publicação
               </legend>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-              <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/72 px-4 py-3 text-sm font-medium text-[var(--foreground)]">
-                <input
-                  type="checkbox"
-                  checked={form.isDefault}
-                  onChange={(event) =>
-                    setForm((current) => ({
-                      ...current,
-                      isDefault: event.target.checked,
-                    }))
-                  }
-                  className="h-4 w-4 accent-[var(--primary)]"
-                />
-                Unidade padrão da base
-              </label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <label className="flex min-h-11 items-center gap-2.5 rounded-xl border border-[var(--border)] bg-white/72 px-3 py-2 text-sm font-medium text-[var(--foreground)]">
+                  <input
+                    type="checkbox"
+                    checked={form.isDefault}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        isDefault: event.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4 accent-[var(--primary)]"
+                  />
+                  Unidade padrão da base
+                </label>
 
-              <label className="flex min-h-14 items-center gap-3 rounded-2xl border border-[var(--border)] bg-white/72 px-4 py-3 text-sm font-medium text-[var(--foreground)]">
-                <input
-                  type="checkbox"
-                  checked={form.active}
-                  onChange={(event) =>
-                    setForm((current) => ({ ...current, active: event.target.checked }))
-                  }
-                  className="h-4 w-4 accent-[var(--primary)]"
-                />
-                Unidade ativa
-              </label>
+                <label className="flex min-h-11 items-center gap-2.5 rounded-xl border border-[var(--border)] bg-white/72 px-3 py-2 text-sm font-medium text-[var(--foreground)]">
+                  <input
+                    type="checkbox"
+                    checked={form.active}
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, active: event.target.checked }))
+                    }
+                    className="h-4 w-4 accent-[var(--primary)]"
+                  />
+                  Unidade ativa
+                </label>
               </div>
             </fieldset>
 
@@ -457,12 +456,6 @@ export default function UnidadesPage() {
             eyebrow="Unidades cadastradas"
             title="Mapa operacional"
             description="Ordene, ative e ajuste a base de referência disponível no editor da Home."
-            action={
-              <button type="button" onClick={resetForm} className={developerSecondaryButtonClassName}>
-                <Plus size={16} weight="bold" />
-                Nova unidade
-              </button>
-            }
           />
 
           {loading ? <DeveloperMessage tone="info">Carregando unidades...</DeveloperMessage> : null}
@@ -470,17 +463,17 @@ export default function UnidadesPage() {
 
           <div className="overflow-hidden">
             <div
-              className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
+              className="flex items-start transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
               style={{ transform: `translateX(-${currentPage * 100}%)` }}
             >
               {pages.map((page, pageIndex) => (
-                <div key={pageIndex} className="w-full shrink-0 space-y-4">
+                <div key={pageIndex} className="grid w-full shrink-0 gap-4 xl:grid-cols-2">
                   {page.map((item) => (
                     <article
                       key={item.id}
                       className="rounded-[24px] border border-[var(--border)] bg-white/72 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)]"
                     >
-                      <div className="flex flex-col gap-4">
+                      <div className="flex h-full flex-col gap-4">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="rounded-full border border-[var(--border)] bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
                             Ordem {item.order ?? 0}
@@ -514,7 +507,7 @@ export default function UnidadesPage() {
                           ) : null}
                         </div>
 
-                        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        <div className="mt-auto grid gap-2 sm:grid-cols-2">
                           <button
                             type="button"
                             onClick={() => editItem(item)}
@@ -550,6 +543,7 @@ export default function UnidadesPage() {
                           <DeveloperConfirmButton
                             message="Confirmar exclusão"
                             onConfirm={() => deleteItem(item.id)}
+                            className="sm:col-span-2"
                           >
                             <Trash size={16} weight="bold" />
                             Excluir

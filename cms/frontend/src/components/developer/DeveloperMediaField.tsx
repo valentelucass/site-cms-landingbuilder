@@ -59,6 +59,7 @@ interface DeveloperMediaFieldProps {
   afterControls?: ReactNode;
   availableMedia?: AdminMediaRecord[];
   showLibraryLink?: boolean;
+  emptyLabel?: string;
 }
 
 function mediaTypeFromUrl(value: string): "image" | "video" {
@@ -99,6 +100,7 @@ export function DeveloperMediaField({
   afterControls,
   availableMedia,
   showLibraryLink = true,
+  emptyLabel = "Nenhuma mídia selecionada",
 }: DeveloperMediaFieldProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerPage, setPickerPage] = useState(0);
@@ -213,7 +215,7 @@ export function DeveloperMediaField({
               displayedValue ? "text-[var(--foreground)]" : "text-[var(--color-muted-raw)]"
             )}
           >
-            {displayedValue || "Nenhuma mídia selecionada"}
+            {displayedValue || emptyLabel}
           </span>
           <ImagesSquare
             size={compact ? 15 : 16}

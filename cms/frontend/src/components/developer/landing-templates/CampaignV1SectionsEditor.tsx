@@ -1,5 +1,7 @@
 "use client";
 
+import { createPortal } from "react-dom";
+import { useState } from "react";
 import { Plus } from "@phosphor-icons/react";
 import { DeveloperCard, DeveloperColorField, DeveloperField, DeveloperHelp, DeveloperSectionHeading, developerInputClassName, developerSecondaryButtonClassName } from "../ui";
 import type { ResponsiveMediaPresentation } from "@shared/types/media";
@@ -50,7 +52,28 @@ function VisibilityToggle({ checked, onChange }: { checked: boolean; onChange: (
 }
 
 function MediaSelect({ value, media, emptyLabel, onChange }: { value: string; media: CampaignMedia[]; emptyLabel: string; onChange: (value: string) => void }) {
-  return <select value={value} onChange={(event) => onChange(event.target.value)} className={developerInputClassName}><option value="">{emptyLabel}</option>{media.map((item) => <option key={item.id} value={item.url}>{item.alt || item.id}</option>)}</select>;
+  const [open, setOpen] = useState(false);
+  const selected = media.find((item) => item.url === value);
+
+  return <>
+    <button type="button" onClick={() => setOpen(true)} aria-haspopup="dialog" className={`${developerInputClassName} flex min-h-10 items-center justify-between gap-3 text-left hover:border-[var(--primary)]/35 hover:bg-white`}>
+      <span className={selected ? "truncate text-[var(--foreground)]" : "truncate text-[var(--color-muted-raw)]"}>{selected?.alt || selected?.id || emptyLabel}</span>
+      <span className="shrink-0 text-[var(--primary)]">Escolher</span>
+    </button>
+    {open ? createPortal(
+      <div className="cms-content-dialog fixed inset-0 z-[9999] flex items-center justify-center p-4">
+        <button type="button" aria-label="Fechar biblioteca de mídias" onClick={() => setOpen(false)} className="absolute inset-0 bg-slate-950/70 backdrop-blur-[2px]" />
+        <section role="dialog" aria-modal="true" aria-label="Escolher mídia da campanha" className="relative z-10 flex max-h-[calc(100dvh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-white/20 bg-white shadow-[0_28px_90px_rgba(15,23,42,0.32)]">
+          <header className="flex items-start justify-between gap-4 border-b border-[var(--border)] bg-slate-50 px-4 py-3"><div><p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">Biblioteca da campanha</p><h3 className="mt-1 text-base font-semibold text-[var(--foreground)]">Escolha uma mídia</h3></div><button type="button" onClick={() => setOpen(false)} className="text-sm font-semibold text-[var(--color-muted-raw)] hover:text-[var(--foreground)]">Fechar</button></header>
+          <div className="grid max-h-[60dvh] grid-cols-2 gap-3 overflow-y-auto p-4 sm:grid-cols-3 lg:grid-cols-4">
+            <button type="button" onClick={() => { onChange(""); setOpen(false); }} className={`flex min-h-28 items-center justify-center rounded-xl border px-3 text-center text-xs font-semibold transition ${!value ? "border-[var(--primary)] bg-[var(--primary)]/8 text-[var(--primary)]" : "border-dashed border-[var(--border)] text-[var(--color-muted-raw)] hover:border-[var(--primary)]/35"}`}>{emptyLabel}</button>
+            {media.map((item) => <button key={item.id} type="button" onClick={() => { onChange(item.url); setOpen(false); }} className={`overflow-hidden rounded-xl border text-left transition hover:-translate-y-px ${value === item.url ? "border-[var(--primary)] ring-2 ring-[var(--primary)]/15" : "border-[var(--border)] hover:border-[var(--primary)]/35"}`}><img src={item.url} alt={item.alt || item.id} className="h-24 w-full bg-slate-100 object-cover" /><span className="block truncate px-2.5 py-2 text-xs font-semibold text-[var(--foreground)]">{item.alt || item.id}</span></button>)}
+          </div>
+        </section>
+      </div>,
+      document.body
+    ) : null}
+  </>;
 }
 
 function PairFields({ label, index, item, onChange }: { label: string; index: number; item: ContentItem; onChange: (item: ContentItem) => void }) {

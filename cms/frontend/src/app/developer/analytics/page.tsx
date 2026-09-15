@@ -268,7 +268,7 @@ export default function AnalyticsPage() {
     totalPages: eventEntriesTotalPages,
     nextPage: nextEventEntriesPage,
     prevPage: prevEventEntriesPage,
-  } = useCarouselPagination(eventEntries, 5);
+  } = useCarouselPagination(eventEntries, 6);
   const {
     pages: eventsTablePages,
     currentPage: eventsTablePage,
@@ -343,11 +343,9 @@ export default function AnalyticsPage() {
           },
         ]}
         actions={
-          <div className="flex items-stretch gap-2">
-            <div className="flex h-[54px] items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3 shadow-sm backdrop-blur-md">
-              <label htmlFor="analytics-period" className="whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-300">
+          <div className="flex items-center gap-3">
+            <label htmlFor="analytics-period" className="flex items-center gap-2 whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-300">
                 Período
-              </label>
               <input
                 id="analytics-period"
                 type="number"
@@ -356,10 +354,10 @@ export default function AnalyticsPage() {
                 value={daysInput}
                 onChange={(event) => setDaysInput(Number(event.target.value) || 30)}
                 aria-label="Período em dias"
-                className="h-8 w-16 rounded-lg border border-white/10 bg-slate-900/70 px-2 text-sm font-medium text-sky-100 outline-none transition-colors focus:border-sky-300/60 focus:ring-2 focus:ring-sky-300/15"
+                className="h-10 w-16 rounded-lg border border-white/15 bg-white/[0.08] px-2 text-sm font-medium normal-case tracking-normal text-sky-100 outline-none transition-colors focus:border-sky-300/60 focus:bg-white/[0.12] focus:ring-2 focus:ring-sky-300/15"
               />
-            </div>
-            <button type="button" onClick={handleRefresh} className={cn(developerSecondaryButtonClassName, "h-[54px] min-h-[54px] px-4 py-2 text-xs")}>
+            </label>
+            <button type="button" onClick={handleRefresh} className={cn(developerSecondaryButtonClassName, "h-10 min-h-10 px-3 py-2 text-xs")}>
               <Pulse size={15} weight="bold" />
               Atualizar
             </button>
@@ -412,7 +410,7 @@ export default function AnalyticsPage() {
           </section>
 
           <section className="mt-5 grid gap-4 lg:grid-cols-2">
-            <DeveloperCard className="flex h-full flex-col p-4 sm:p-4 [&>div:first-child]:mb-3 [&>div:first-child_p:last-child]:leading-5">
+            <DeveloperCard className="self-start p-4 sm:p-4 [&>div:first-child]:mb-3 [&>div:first-child_p:last-child]:leading-5">
               <DeveloperSectionHeading
                 eyebrow="Páginas"
                 title="Top páginas do período"
@@ -459,16 +457,16 @@ export default function AnalyticsPage() {
               <div className="mt-3"><DeveloperCarouselPagination currentPage={topPagesPage} totalPages={topPagesTotalPages} onNext={nextTopPagesPage} onPrev={prevTopPagesPage} compact /></div>
             </DeveloperCard>
 
-            <DeveloperCard className="flex h-full flex-col p-4 sm:p-4 [&>div:first-child]:mb-3 [&>div:first-child_p:last-child]:leading-5">
+            <DeveloperCard className="self-start p-4 sm:p-4 [&>div:first-child]:mb-3 [&>div:first-child_p:last-child]:leading-5">
               <DeveloperSectionHeading
                 eyebrow="Eventos"
                 title="Contagem por tipo"
                 description="Resumo dos eventos recebidos pelo analytics."
               />
 
-              <div className="flex-1 overflow-hidden">
+              <div className="overflow-hidden">
                 <div
-                  className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
+                  className="flex items-start transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                   style={{ transform: `translateX(-${eventEntriesPage * 100}%)` }}
                 >
                   {eventEntriesPages.map((page, index) => (
@@ -615,90 +613,82 @@ export default function AnalyticsPage() {
           <DeveloperSectionHeading
             eyebrow="Configuração"
             title="Eventos internos e integrações"
-            description="Configura somente os recursos consumidos pela telemetria pública. O consentimento permanece centralizado em LGPD/Cookies."
+            description="Eventos próprios e integrações usados pelo site. O consentimento é definido em LGPD/Cookies."
             tooltip="Estas opções controlam os eventos internos e os provedores externos efetivamente carregados pelo site."
           />
 
-          <div className="space-y-3">
-            <div className="grid gap-2 rounded-lg border border-[#bfdbfe] bg-[linear-gradient(135deg,rgba(239,246,255,0.9),rgba(255,255,255,0.95))] p-2.5 sm:grid-cols-[minmax(220px,0.7fr)_minmax(280px,1.3fr)] sm:items-end sm:gap-3">
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--primary)]">
-                  Eventos próprios
-                </p>
-                <label className="mt-1.5 flex min-h-9 items-center gap-2.5 rounded-lg border border-white bg-white/92 px-3 py-2 text-xs font-medium text-[var(--foreground)] shadow-[0_5px_12px_rgba(29,78,216,0.04)]">
+          <div className="grid gap-x-4 gap-y-3 border-t border-[var(--border)]/75 pt-3 lg:grid-cols-2 xl:grid-cols-4">
+            <label className="flex min-h-9 items-center gap-2.5 text-xs font-medium text-[var(--foreground)] xl:self-end">
+              <input
+                type="checkbox"
+                checked={form.trackingEnabled}
+                onChange={(event) => setValue("trackingEnabled", event.target.checked)}
+                className="h-4 w-4 accent-[var(--primary)]"
+              />
+              Eventos internos ativos
+              <DeveloperHelp label="Eventos internos ativos" templateKey="eventos-internos-ativos" />
+            </label>
+
+            <DeveloperField
+              label="Marcos de scroll (%)"
+              helpKey="marcos-de-scroll"
+              className="[&>span]:!mb-1"
+            >
+              <input
+                value={form.scrollMilestones}
+                onChange={(event) => setValue("scrollMilestones", event.target.value)}
+                className={compactAnalyticsInputClassName}
+              />
+            </DeveloperField>
+
+            {[
+              {
+                enabledKey: "ga4Enabled" as const,
+                fieldKey: "ga4MeasurementId" as const,
+                label: "GA4",
+                fieldLabel: "Measurement ID",
+                enabledHelpKey: "ga4",
+                fieldHelpKey: "measurement-id",
+              },
+              {
+                enabledKey: "clarityEnabled" as const,
+                fieldKey: "clarityProjectId" as const,
+                label: "Clarity",
+                fieldLabel: "Project ID",
+                enabledHelpKey: "clarity",
+                fieldHelpKey: "project-id",
+              },
+            ].map((item) => (
+              <div key={item.label} className="flex min-w-0 items-end gap-2.5">
+                <label className="flex min-h-9 shrink-0 items-center gap-2 text-xs font-medium text-[var(--foreground)]">
                   <input
                     type="checkbox"
-                    checked={form.trackingEnabled}
-                    onChange={(event) => setValue("trackingEnabled", event.target.checked)}
+                    checked={form[item.enabledKey]}
+                    onChange={(event) =>
+                      setValue(item.enabledKey, event.target.checked)
+                    }
                     className="h-4 w-4 accent-[var(--primary)]"
                   />
-                  Eventos internos ativos
-                  <DeveloperHelp label="Eventos internos ativos" templateKey="eventos-internos-ativos" />
+                  {item.label}
+                  <DeveloperHelp label={item.label} templateKey={item.enabledHelpKey} />
                 </label>
+
+                <DeveloperField label={item.fieldLabel} helpKey={item.fieldHelpKey} className="min-w-0 flex-1 [&>span]:!mb-1">
+                  <input
+                    value={form[item.fieldKey]}
+                    onChange={(event) =>
+                      setValue(item.fieldKey, event.target.value)
+                    }
+                    required={form[item.enabledKey]}
+                    aria-required={form[item.enabledKey]}
+                    maxLength={item.fieldKey === "ga4MeasurementId" ? 40 : 80}
+                    className={compactAnalyticsInputClassName}
+                  />
+                </DeveloperField>
               </div>
-              <DeveloperField
-                label="Marcos de scroll (%)"
-                helpKey="marcos-de-scroll"
-                className="[&>span]:!mb-1"
-              >
-                <input
-                  value={form.scrollMilestones}
-                  onChange={(event) => setValue("scrollMilestones", event.target.value)}
-                  className={compactAnalyticsInputClassName}
-                />
-              </DeveloperField>
-            </div>
+            ))}
 
-            <div className="grid gap-3 lg:grid-cols-2">
-              {[
-                {
-                  enabledKey: "ga4Enabled" as const,
-                  fieldKey: "ga4MeasurementId" as const,
-                  label: "GA4",
-                  fieldLabel: "Measurement ID",
-                  enabledHelpKey: "ga4",
-                  fieldHelpKey: "measurement-id",
-                },
-                {
-                  enabledKey: "clarityEnabled" as const,
-                  fieldKey: "clarityProjectId" as const,
-                  label: "Clarity",
-                  fieldLabel: "Project ID",
-                  enabledHelpKey: "clarity",
-                  fieldHelpKey: "project-id",
-                },
-              ].map((item) => (
-                <div key={item.label} className={cn("grid gap-2 rounded-lg border px-3 py-2.5 shadow-[0_6px_16px_rgba(15,23,42,0.035)] sm:grid-cols-[auto_minmax(0,1fr)] sm:items-end sm:gap-3", form[item.enabledKey] ? "border-[#93c5fd] bg-[#eff6ff]" : "border-slate-200 bg-slate-50/82")}>
-                  <label className="flex min-h-9 items-center gap-2.5 text-xs font-medium text-[var(--foreground)]">
-                    <input
-                      type="checkbox"
-                      checked={form[item.enabledKey]}
-                      onChange={(event) =>
-                        setValue(item.enabledKey, event.target.checked)
-                      }
-                      className="h-4 w-4 accent-[var(--primary)]"
-                    />
-                    {item.label}
-                    <DeveloperHelp label={item.label} templateKey={item.enabledHelpKey} />
-                  </label>
-
-                  <DeveloperField label={item.fieldLabel} helpKey={item.fieldHelpKey} className="[&>span]:!mb-1">
-                    <input
-                      value={form[item.fieldKey]}
-                      onChange={(event) =>
-                        setValue(item.fieldKey, event.target.value)
-                      }
-                      required={form[item.enabledKey]}
-                      aria-required={form[item.enabledKey]}
-                      maxLength={item.fieldKey === "ga4MeasurementId" ? 40 : 80}
-                      className={compactAnalyticsInputClassName}
-                    />
-                  </DeveloperField>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col gap-2 sm:flex-row">
+            <div className="flex flex-col gap-2 border-t border-[var(--border)]/75 pt-3 sm:flex-row xl:col-span-4 xl:justify-end">
               <button type="button" onClick={handleSave} disabled={saving} className={cn(developerPrimaryButtonClassName, "!min-h-9 !rounded-lg !px-3 !py-1.5 text-xs")}>
                 <CheckCircle size={18} weight="bold" />
                 {saving ? "Salvando..." : "Salvar configuração"}
@@ -710,7 +700,6 @@ export default function AnalyticsPage() {
                 <DeveloperHelp label="Atualizar métricas" templateKey="atualizar-metricas" />
               </button>
             </div>
-
           </div>
         </DeveloperCard>
       </section>

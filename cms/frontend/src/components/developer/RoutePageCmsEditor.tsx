@@ -96,16 +96,11 @@ const panelClassName =
 const priorityPanelClassName =
   "rounded-[22px] border border-[#93c5fd] bg-[linear-gradient(135deg,rgba(219,234,254,0.82)_0%,rgba(239,246,255,0.8)_54%,rgba(248,251,255,0.9)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_10px_24px_rgba(29,78,216,0.08)] ring-1 ring-[var(--primary)]/7 sm:p-5";
 
-const editableSectionClassName =
-  "rounded-[24px] border border-slate-200 bg-slate-50/86 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.045)] sm:p-5";
-
 const aboutSections = [
   { key: "hero", label: "Hero", description: "Abertura da página" },
   { key: "compliance", label: "Governança", description: "Compliance e carrossel de certificados" },
   { key: "finalCta", label: "CTA final", description: "Encerramento e ações" },
-] as const;
-
-type AboutSectionKey = (typeof aboutSections)[number]["key"];
+];
 
 function clonePage<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
@@ -266,7 +261,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
   const [contactInfoOpenIndex, setContactInfoOpenIndex] = useState<number | null>(0);
   const [quoteDirectChannelsOpenIndex, setQuoteDirectChannelsOpenIndex] = useState<number | null>(null);
   const [quoteOtherChannelsOpenIndex, setQuoteOtherChannelsOpenIndex] = useState<number | null>(null);
-  const [activeAboutSection, setActiveAboutSection] = useState<AboutSectionKey>("hero");
+  const [openAboutSectionIndex, setOpenAboutSectionIndex] = useState<number | null>(0);
   const [previewRevision, setPreviewRevision] = useState(0);
   const [cultureFramingOpen, setCultureFramingOpen] = useState(false);
 
@@ -390,39 +385,24 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
               <DeveloperSectionHeading
                 eyebrow="Edição por seção"
                 title="Página Sobre"
-                description="Selecione uma seção fixa para editar seu conteúdo com mais foco."
+                description="Abra uma seção fixa para editar seu conteúdo com mais foco."
               />
 
-              <div className="grid gap-2 rounded-[18px] border border-[var(--border)]/80 bg-white/70 p-1.5 sm:grid-cols-3">
-                {aboutSections.map((section, index) => {
-                  const isActive = section.key === activeAboutSection;
-                  return (
-                    <button
-                      key={section.key}
-                      type="button"
-                      onClick={() => setActiveAboutSection(section.key)}
-                      className={cn(
-                        "rounded-[14px] border px-3 py-2 text-left transition-all duration-200",
-                        "hover:-translate-y-0.5 hover:border-[var(--primary)]/35 hover:bg-white",
-                        isActive
-                          ? "border-[var(--primary)]/38 bg-[linear-gradient(145deg,rgba(255,255,255,0.96)_0%,rgba(219,234,254,0.9)_100%)] shadow-[0_14px_34px_rgba(29,78,216,0.12)]"
-                          : "border-transparent bg-transparent text-[var(--color-muted-raw)]"
-                      )}
-                    >
-                      <span className="sr-only">Seção fixa</span>
-                      <span className="flex min-w-0 items-center gap-2">
-                        <span className={cn("inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold", isActive ? "bg-[var(--primary)] text-white" : "bg-slate-200/80 text-slate-600")}>{index + 1}</span>
-                        <span className="shrink-0 text-sm font-semibold text-[var(--foreground)]">{section.label}</span>
-                        <span className="truncate text-xs text-[var(--color-muted-raw)]">{section.description}</span>
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {activeAboutSection === "hero" ? renderAboutHero() : null}
-              {activeAboutSection === "compliance" ? renderAboutCompliance() : null}
-              {activeAboutSection === "finalCta" ? renderAboutFinalCta() : null}
+              <DeveloperCmsAccordion
+                items={aboutSections}
+                openIndex={openAboutSectionIndex}
+                onOpenChange={setOpenAboutSectionIndex}
+                getEyebrow={(_, index) => `Seção fixa ${index + 1}`}
+                getTitle={(section) => section.label}
+                variant="services"
+                renderItem={(section) => (
+                  section.key === "hero"
+                    ? renderAboutHero()
+                    : section.key === "compliance"
+                      ? renderAboutCompliance()
+                      : renderAboutFinalCta()
+                )}
+              />
             </DeveloperCard>
           </>
         ) : null}
@@ -620,12 +600,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
     }
 
     return (
-      <article className={cn(editableSectionClassName, "mt-5")}>
-        <div className="mb-5 rounded-[18px] border border-[var(--primary)]/16 bg-[linear-gradient(135deg,rgba(219,234,254,0.62)_0%,rgba(255,255,255,0.86)_70%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Seção fixa 1</p>
-          <h3 className="mt-1 text-base font-semibold text-[var(--foreground)]">Hero</h3>
-          <p className="mt-1 text-sm leading-6 text-[var(--color-muted-raw)]">Textos, indicadores e botões exibidos na abertura de /sobre. A imagem de fundo permanece fixa.</p>
-        </div>
+      <div className="space-y-4">
         <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void saveSection("hero", current.hero); }}>
           <div className={cn(priorityPanelClassName, "grid gap-5 md:grid-cols-2")}>
             <TextInput label="Selo" value={current.hero.eyebrow ?? "Nossa história"} maxLength={80} helpKey="hero-eyebrow" className="md:col-span-2" onChange={(value) => update((draft) => { draft.hero.eyebrow = value; })} />
@@ -653,7 +628,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
           <ButtonFields buttons={current.hero.buttons} onChange={(buttons) => update((draft) => { draft.hero.buttons = buttons; })} mutedSurface />
           <SaveButton saving={saving === "hero"}>Salvar hero</SaveButton>
         </form>
-      </article>
+      </div>
     );
   }
 
@@ -661,12 +636,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
     if (!page) return null;
     const current = page;
     return (
-      <article className={cn(editableSectionClassName, "mt-5")}>
-        <div className="mb-5 rounded-[18px] border border-[var(--primary)]/16 bg-[linear-gradient(135deg,rgba(219,234,254,0.62)_0%,rgba(255,255,255,0.86)_70%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Seção fixa 2</p>
-          <h3 className="mt-1 text-base font-semibold text-[var(--foreground)]">Governança</h3>
-          <p className="mt-1 text-sm leading-6 text-[var(--color-muted-raw)]">Título da seção e certificados exibidos no carrossel de /sobre.</p>
-        </div>
+      <div className="space-y-4">
         <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void saveSection("compliance", current.compliance); }}>
           <div className={priorityPanelClassName}>
             <TextInput label="Título da seção" value={current.compliance.title} maxLength={220} onChange={(value) => update((draft) => { draft.compliance.title = value; })} />
@@ -717,7 +687,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
           />
           <SaveButton saving={saving === "compliance"}>Salvar governança</SaveButton>
         </form>
-      </article>
+      </div>
     );
   }
 
@@ -725,12 +695,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
     if (!page) return null;
     const current = page;
     return (
-      <article className={cn(editableSectionClassName, "mt-5 border-[#93c5fd] bg-[linear-gradient(135deg,rgba(219,234,254,0.55)_0%,rgba(248,251,255,0.9)_65%)] ring-1 ring-[var(--primary)]/7")}>
-        <div className="mb-5 rounded-[18px] border border-[var(--primary)]/16 bg-white/82 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--primary)]">Seção fixa 3</p>
-          <h3 className="mt-1 text-base font-semibold text-[var(--foreground)]">CTA final</h3>
-          <p className="mt-1 text-sm leading-6 text-[var(--color-muted-raw)]">Chamada de encerramento e os dois caminhos de ação de /sobre.</p>
-        </div>
+      <div className="space-y-4">
         <form className="space-y-4" onSubmit={(event) => { event.preventDefault(); void saveSection("finalCta", current.finalCta); }}>
           <div className={cn(priorityPanelClassName, "grid gap-5 md:grid-cols-2")}>
             <TextInput label="Título" value={current.finalCta.title} maxLength={320} onChange={(value) => update((draft) => { draft.finalCta.title = value; })} />
@@ -739,7 +704,7 @@ export function RoutePageCmsEditor({ pageKey }: { pageKey: PageKey }) {
           <ButtonFields buttons={current.finalCta.buttons} onChange={(buttons) => update((draft) => { draft.finalCta.buttons = buttons; })} mutedSurface />
           <SaveButton saving={saving === "finalCta"}>Salvar CTA final</SaveButton>
         </form>
-      </article>
+      </div>
     );
   }
 

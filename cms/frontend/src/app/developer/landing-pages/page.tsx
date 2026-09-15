@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { ArrowRight, ArrowSquareOut, Eye, FloppyDisk, RocketLaunch } from "@phosphor-icons/react";
 import type { LandingMedia } from "@/components/developer/LandingVisualEditor";
 import { CampaignV1Editor, type CampaignV1Landing } from "@/components/developer/landing-templates/CampaignV1Editor";
+import { DeveloperMediaField, type AdminMediaRecord as CmsMediaRecord } from "@/components/developer/DeveloperMediaField";
 import {
   DeveloperCard,
   DeveloperCarouselPagination,
@@ -202,35 +203,21 @@ function LandingTemplatePreview() {
   </div>;
 }
 
-function LandingProjectPreview({ landing }: { landing: LandingForm }) {
+function LandingProjectCard({ landing, active, onOpen }: { landing: LandingForm; active: boolean; onOpen: () => void }) {
   const primary = landing.theme.primaryColor || "#2a55d9";
   const secondary = landing.theme.secondaryColor || "#172b46";
-  const background = landing.theme.backgroundColor || "#f5f7fb";
-  const title = landing.hero.title.trim() || landing.name;
 
-  return <div aria-hidden="true" className="relative h-full overflow-hidden" style={{ background }}>
-    <div className="absolute inset-x-0 top-0 h-[56%] px-[9%] pt-[8%]" style={{ background: secondary }}>
-      <div className="flex items-center justify-between"><span className="h-1.5 w-[18%] rounded-full bg-white/80" /><span className="h-1 w-[28%] rounded-full bg-white/30" /></div>
-      <span className="mt-[12%] block h-1.5 w-[28%] rounded-full bg-white/55" />
-      <p className="mt-[4%] max-w-[72%] overflow-hidden text-[clamp(6px,1.15vw,11px)] font-bold leading-[1.1] text-white" style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 3 }}>{title}</p>
-      <span className="mt-[8%] block h-4 w-[32%] rounded" style={{ background: primary }} />
-      <span className="absolute -right-[15%] -top-[45%] size-[75%] rounded-full border-[18px] border-white/10" />
-    </div>
-    <div className="absolute inset-x-0 bottom-0 grid h-[44%] grid-rows-[1fr_0.72fr] gap-[12%] px-[9%] py-[7%]">
-      <div className="grid grid-cols-[1.1fr_0.9fr] gap-[8%]"><div><span className="block h-1.5 w-[72%] rounded-full bg-slate-700" /><span className="mt-[9%] block h-1 w-full rounded-full bg-slate-300" /><span className="mt-[7%] block h-1 w-[76%] rounded-full bg-slate-300" /></div><div className="rounded" style={{ background: `${primary}24` }}><span className="m-[13%] block h-[74%] rounded" style={{ background: primary }} /></div></div>
-      <div className="grid grid-cols-3 gap-[7%]"><span className="rounded" style={{ background: secondary }} /><span className="rounded" style={{ background: secondary }} /><span className="rounded" style={{ background: secondary }} /></div>
-    </div>
-  </div>;
-}
-
-function LandingProjectCard({ landing, active, onOpen }: { landing: LandingForm; active: boolean; onOpen: () => void }) {
-  return <button type="button" onClick={onOpen} className={`group flex h-full min-h-[216px] w-full flex-col overflow-hidden rounded-xl border text-left shadow-[0_8px_18px_rgba(15,23,42,0.06)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_26px_rgba(15,23,42,0.11)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 ${active ? "border-[var(--primary)] bg-[var(--primary)]/[0.06] ring-1 ring-[var(--primary)]/15" : "border-[var(--border)] bg-white/80 hover:border-[var(--primary)]/45"}`}>
-    <div className="relative aspect-[16/7] w-full shrink-0 border-b border-[var(--border)]/70 bg-slate-100"><LandingProjectPreview landing={landing} /><span className="absolute left-2 top-2 rounded-full bg-slate-950/75 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.13em] text-white">Prévia</span></div>
-    <div className="flex min-h-0 flex-1 flex-col p-3">
-      <div className="flex items-start justify-between gap-2"><div className="min-w-0"><p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[var(--primary)]">Landing comercial</p><h3 className="mt-1 truncate text-sm font-bold text-[var(--foreground)]">{landing.name}</h3></div><DeveloperStatusPill active={landing.status === "published"} activeLabel="Publicada" inactiveLabel={labelForStatus(landing.status)} /></div>
-      <p className="mt-2 truncate font-mono text-[10px] text-[var(--color-muted-raw)]">/{landing.slug}</p>
-      <span className="mt-auto flex items-center justify-between border-t border-[var(--border)]/75 pt-2.5 text-[11px] font-bold text-[var(--primary)]">Editar projeto <ArrowRight size={14} weight="bold" className="transition-transform duration-200 group-hover:translate-x-0.5" /></span>
-    </div>
+  return <button type="button" onClick={onOpen} className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left shadow-[0_4px_12px_rgba(15,23,42,0.035)] transition-all duration-200 hover:-translate-y-px hover:shadow-[0_8px_18px_rgba(15,23,42,0.07)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/20 ${active ? "border-[var(--primary)] bg-[var(--primary)]/[0.06] ring-1 ring-[var(--primary)]/15" : "border-[var(--border)] bg-white/80 hover:border-[var(--primary)]/45"}`}>
+    <span aria-hidden="true" className="h-9 w-1.5 shrink-0 rounded-full" style={{ background: `linear-gradient(180deg, ${primary}, ${secondary})` }} />
+    <span className="min-w-0 flex-1">
+      <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.15em] text-[var(--primary)]">
+        Landing comercial
+        <span className="truncate font-mono normal-case tracking-normal text-[var(--color-muted-raw)]">/{landing.slug}</span>
+      </span>
+      <span className="mt-0.5 block truncate text-sm font-bold text-[var(--foreground)]">{landing.name}</span>
+    </span>
+    <DeveloperStatusPill active={landing.status === "published"} activeLabel="Publicada" inactiveLabel={labelForStatus(landing.status)} />
+    <ArrowRight size={16} weight="bold" className="shrink-0 text-[var(--primary)] transition-transform duration-200 group-hover:translate-x-0.5" />
   </button>;
 }
 
@@ -266,6 +253,20 @@ export default function LandingPagesPage() {
   });
   const landings = useMemo(() => data?.landings?.map(normalizeLanding) ?? [], [data?.landings]);
   const media = mediaData?.media ?? [];
+  const posterMedia = useMemo<CmsMediaRecord[]>(
+    () => media
+      .filter((item) => item.kind === "image")
+      .map((item) => ({
+        name: item.alt || item.id,
+        url: item.url,
+        source: "library",
+        usedInContent: false,
+        size: 0,
+        references: 0,
+        mediaType: "image",
+      })),
+    [media]
+  );
   const templatesTotalPages = Math.max(1, Math.ceil(LANDING_TEMPLATES.length / LANDING_TEMPLATES_PER_PAGE));
   const visibleTemplates = useMemo(() => LANDING_TEMPLATES.slice(templatesPage * LANDING_TEMPLATES_PER_PAGE, (templatesPage + 1) * LANDING_TEMPLATES_PER_PAGE), [templatesPage]);
   const projectsTotalPages = Math.max(1, Math.ceil(landings.length / LANDING_PROJECTS_PER_PAGE));
@@ -580,17 +581,17 @@ export default function LandingPagesPage() {
     {mediaLoading ? <div className="mt-3"><DeveloperMessage tone="info">Carregando biblioteca da campanha...</DeveloperMessage></div> : null}
     {mediaError ? <div className="mt-3"><DeveloperMessage tone="error">{mediaError}</DeveloperMessage></div> : null}
 
-    <DeveloperCard className="mt-5 py-4">
-      <DeveloperSectionHeading eyebrow="Projetos e sites" title="Seus projetos" action={<button type="button" onClick={openNewProjectDialog} className={`${developerPrimaryButtonClassName} min-h-9 px-3 py-2 text-xs`}>Iniciar novo projeto</button>} />
+    <DeveloperCard className="mt-5 p-4 sm:p-4">
+      <DeveloperSectionHeading className="mb-3" eyebrow="Projetos e sites" title="Seus projetos" action={<button type="button" onClick={openNewProjectDialog} className={`${developerPrimaryButtonClassName} min-h-9 px-3 py-2 text-xs`}>Iniciar novo projeto</button>} />
       {landings.length === 0 && !loading ? <p className="mt-2 text-sm text-[var(--color-muted-raw)]">Nenhum projeto criado. Clique em <strong className="font-semibold text-[var(--foreground)]">Iniciar novo projeto</strong> para escolher um template.</p> : null}
-      {landings.length > 0 ? <><div className="mt-3 grid grid-cols-[repeat(auto-fill,minmax(12.5rem,14.5rem))] justify-start gap-3">
+      {landings.length > 0 ? <><div className="grid gap-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {visibleProjects.map((landing) => <LandingProjectCard key={landing.id} landing={landing} active={form.id === landing.id} onOpen={() => { setCreatingNew(false); setForm(landing); setSavedFingerprint(JSON.stringify(landing)); setPublishAt(localDateTime(landing.scheduledPublishAt)); setUnpublishAt(localDateTime(landing.scheduledUnpublishAt)); setPreviewPath(null); setRevisions([]); notify(null); }} />)}
-      </div><DeveloperCarouselPagination currentPage={projectsPage} totalPages={projectsTotalPages} onNext={() => setProjectsPage((current) => Math.min(current + 1, projectsTotalPages - 1))} onPrev={() => setProjectsPage((current) => Math.max(current - 1, 0))} compact /></> : null}
+      </div>{projectsTotalPages > 1 ? <DeveloperCarouselPagination currentPage={projectsPage} totalPages={projectsTotalPages} onNext={() => setProjectsPage((current) => Math.min(current + 1, projectsTotalPages - 1))} onPrev={() => setProjectsPage((current) => Math.max(current - 1, 0))} compact /> : null}</> : null}
     </DeveloperCard>
 
     {media.length > 0 ? <DeveloperCard className="mt-5">
       <DeveloperSectionHeading eyebrow="Biblioteca" title="Acessibilidade e vídeo" description="Descreva cada mídia para leitores de tela. Vídeos usados na seção Imagem e conteúdo exibem controles; selecione uma imagem como poster quando quiser definir a capa antes da reprodução." />
-      <div className="mt-4 grid gap-3 lg:grid-cols-2">{media.map((item) => <article key={item.id} className="rounded-xl border border-[var(--border)] p-3"><div className="flex items-center justify-between gap-2"><strong className="text-sm text-[var(--foreground)]">{item.kind === "video" ? "Vídeo" : "Imagem"}</strong><span className="text-xs text-[var(--color-muted-raw)]">{item.id}</span></div><DeveloperField label="Descrição alternativa" className="mt-3"><input defaultValue={item.alt ?? ""} maxLength={160} onBlur={(event) => { if (event.target.value !== (item.alt ?? "")) void updateMedia(item, { alt: event.target.value }); }} className={developerInputClassName} placeholder="O que a pessoa deve entender com esta mídia?" /></DeveloperField>{item.kind === "video" ? <DeveloperField label="Poster do vídeo" className="mt-3"><select value={item.poster ?? ""} onChange={(event) => void updateMedia(item, { poster: event.target.value })} className={developerInputClassName}><option value="">Usar primeiro quadro do vídeo</option>{media.filter((candidate) => candidate.kind === "image").map((candidate) => <option key={candidate.id} value={candidate.url}>{candidate.alt || candidate.id}</option>)}</select></DeveloperField> : null}</article>)}</div>
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">{media.map((item) => <article key={item.id} className="rounded-xl border border-[var(--border)] p-3"><div className="flex items-center justify-between gap-2"><strong className="text-sm text-[var(--foreground)]">{item.kind === "video" ? "Vídeo" : "Imagem"}</strong><span className="text-xs text-[var(--color-muted-raw)]">{item.id}</span></div><DeveloperField label="Descrição alternativa" className="mt-3"><input defaultValue={item.alt ?? ""} maxLength={160} onBlur={(event) => { if (event.target.value !== (item.alt ?? "")) void updateMedia(item, { alt: event.target.value }); }} className={developerInputClassName} placeholder="O que a pessoa deve entender com esta mídia?" /></DeveloperField>{item.kind === "video" ? <DeveloperMediaField label="Poster do vídeo" helpKey="landing-pages.field.video-poster" className="mt-3" value={item.poster ?? ""} onChange={(poster) => void updateMedia(item, { poster })} availableMedia={posterMedia} mediaType="image" showPreview={false} showLibraryLink={false} emptyLabel="Usar primeiro quadro do vídeo" compact /> : null}</article>)}</div>
     </DeveloperCard> : null}
 
     {form.id ? <form onSubmit={save} className="mt-5 space-y-5">

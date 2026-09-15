@@ -205,8 +205,9 @@ try {
   await evaluate(`${save}.click()`);
   await waitNotice("error", "Falha de teste");
   assert(await evaluate(`Boolean(${query(".cms-notification [role=alert]")})`));
-  await delay(8500);
-  assert(await evaluate(`Boolean(${query(notice)})`), "Erro não deve sumir automaticamente.");
+  await until(() => evaluate(`!${query(notice)}`), "fechamento automático do erro", 12000);
+  await evaluate(`${save}.click()`);
+  await waitNotice("error", "Falha de teste");
   await evaluate(`${query('[aria-label="Ampliar Logo de teste"]')}.click()`);
   await until(() => evaluate(`Boolean(${query('[data-media-preview-dialog="true"]')})`), "abrir ampliação sob notificação");
   await assertVisible(1920);
@@ -230,7 +231,7 @@ try {
   await evaluate(`${save}.click()`);
   await waitNotice("error", "Falha de teste");
   await evaluate(`${query('[aria-label="Ativar modo claro"]')}.click()`);
-  assert.equal(await evaluate(`getComputedStyle(${query(notice)}).backgroundColor`), "rgb(255, 241, 242)");
+  assert.equal(await evaluate(`getComputedStyle(${query(notice)}).backgroundColor`), "rgb(180, 35, 69)");
   await cdp("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await delay(300);
   await assertVisible(390);
@@ -245,7 +246,7 @@ try {
   await evaluate(`document.querySelector('a[href="/admin/developer/unidades"]').click()`);
   await until(() => evaluate(`location.pathname.endsWith('/unidades') && !${query(notice)}`), "limpar aviso ao navegar");
   assert.deepEqual(failures, []);
-  console.log("PASS: abas da Home usam toda a largura antes de paginar, sem etapa parcial; upload sem publicação, referência preservada ao salvar, aviso fixo sem mudar rolagem, repetição, fechamento sem submit, pausa por foco, expiração de sucesso, erro persistente, temas, mobile, movimento reduzido, Escape isolado do modal, sobreposição e navegação. APIs simuladas; nenhum storage alterado.");
+  console.log("PASS: abas da Home usam toda a largura antes de paginar, sem etapa parcial; upload sem publicação, referência preservada ao salvar, aviso fixo sem mudar rolagem, repetição, fechamento sem submit, pausa por foco, expiração de sucesso e erro, temas, mobile, movimento reduzido, Escape isolado do modal, sobreposição e navegação. APIs simuladas; nenhum storage alterado.");
 } finally {
   socket?.close();
   // Encerra somente o navegador criado por este teste, nunca os processos DEV.

@@ -48,8 +48,6 @@ import { DeveloperResponsivePreview } from "@/components/developer/DeveloperResp
 import { cn } from "@/lib/utils";
 
 type SectionKey = "footer" | "terms" | "help" | "privacy";
-type FooterStepKey = "institutional" | "footer" | "social";
-
 const FOOTER_STEPS = [
   {
     key: "institutional",
@@ -69,7 +67,7 @@ const FOOTER_STEPS = [
     title: "Redes sociais",
     description: "Links externos e a identificação dos canais sociais.",
   },
-] as const;
+];
 
 const SOCIAL_ICON_OPTIONS = [
   ["InstagramLogo", "Instagram"],
@@ -401,7 +399,7 @@ export default function FooterLinksCmsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<SectionKey | "">("");
   const notify = useDeveloperNotifier();
-  const [activeStep, setActiveStep] = useState<FooterStepKey>("institutional");
+  const [openFooterStepIndex, setOpenFooterStepIndex] = useState<number | null>(0);
   const [previewRevision, setPreviewRevision] = useState(0);
 
   useEffect(() => {
@@ -435,19 +433,6 @@ export default function FooterLinksCmsPage() {
     ],
     [content]
   );
-  const activeStepIndex = Math.max(0, FOOTER_STEPS.findIndex((step) => step.key === activeStep));
-  const activeStepInfo = FOOTER_STEPS[activeStepIndex] ?? FOOTER_STEPS[0];
-
-  function selectStep(step: FooterStepKey) {
-    setActiveStep(step);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function moveStep(direction: -1 | 1) {
-    const nextStep = FOOTER_STEPS[activeStepIndex + direction];
-    if (nextStep) selectStep(nextStep.key);
-  }
-
   function update(mutator: (draft: FooterLinksContent) => void) {
     setContent((current) => {
       const next = clone(current);
@@ -502,95 +487,45 @@ export default function FooterLinksCmsPage() {
         />
       </div>
 
-      <section className="mt-5 rounded-[24px] border border-[var(--primary)]/16 bg-[linear-gradient(135deg,rgba(219,234,254,0.9)_0%,rgba(239,246,255,0.86)_54%,rgba(224,242,254,0.78)_100%)] p-4 shadow-[0_12px_28px_rgba(29,78,216,0.08)] sm:p-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)]">
-              Edição por etapas
-            </p>
-            <h2 className="mt-1 text-lg font-semibold tracking-[-0.025em] text-[var(--foreground)]">
-              {activeStepInfo.title}
-            </h2>
-            <p className="mt-1 max-w-[68ch] text-sm leading-5 text-[var(--color-muted-raw)]">
-              {activeStepInfo.description}
-            </p>
-          </div>
-          <div className="inline-flex w-fit items-center rounded-full border border-[var(--primary)]/14 bg-white/72 p-1 shadow-[0_8px_20px_rgba(29,78,216,0.07)]">
-            <button
-              type="button"
-              onClick={() => moveStep(-1)}
-              disabled={activeStepIndex === 0}
-              className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-white hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <CaretLeft size={16} weight="bold" />
-              Anterior
-            </button>
-            <button
-              type="button"
-              onClick={() => moveStep(1)}
-              disabled={activeStepIndex === FOOTER_STEPS.length - 1}
-              className="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-white hover:text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Próximo
-              <CaretRight size={16} weight="bold" />
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-3 grid gap-2 sm:grid-cols-3" role="tablist" aria-label="Selecionar etapa de edição do footer">
-          {FOOTER_STEPS.map((step, index) => {
-            const isActive = step.key === activeStep;
-            return (
-              <button
-                key={step.key}
-                type="button"
-                onClick={() => selectStep(step.key)}
-                role="tab"
-                aria-selected={isActive}
-                aria-current={isActive ? "step" : undefined}
-                className={cn(
-                  "group flex min-h-12 min-w-0 items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors",
-                  isActive
-                    ? "border-[var(--primary)] bg-[var(--primary)] text-white shadow-[0_8px_18px_rgba(29,78,216,0.16)]"
-                    : "border-[var(--primary)]/14 bg-white/58 text-[var(--foreground)] hover:border-[var(--primary)]/32 hover:bg-white/82"
-                )}
-              >
-                <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold", isActive ? "bg-white/18 text-white" : "bg-[var(--primary)]/8 text-[var(--primary)]")}>
-                  {index + 1}
-                </span>
-                <span className="min-w-0 truncate text-sm font-semibold">{step.title}</span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <div className="mt-5 grid gap-5">
-        {activeStep === "institutional" ? (
-          <InstitutionalPagesStep
-            content={content}
-            onChange={(mutator) => update(mutator)}
-            onSave={saveSection}
-            saving={saving}
-          />
-        ) : null}
-        {activeStep === "footer" ? (
-          <FooterGlobalEditor
-            footer={content.footer}
-            onChange={(footer) => update((draft) => { draft.footer = footer; })}
-            onSave={() => saveSection("footer", content.footer)}
-            saving={saving === "footer"}
-          />
-        ) : null}
-        {activeStep === "social" ? (
-          <FooterSocialEditor
-            footer={content.footer}
-            onChange={(footer) => update((draft) => { draft.footer = footer; })}
-            onSave={() => saveSection("footer", content.footer)}
-            saving={saving === "footer"}
-          />
-        ) : null}
-      </div>
+      <DeveloperCard className="mt-5 p-5 sm:p-6">
+        <DeveloperSectionHeading
+          eyebrow="Edição do rodapé"
+          title="Áreas do rodapé"
+          description="Abra Páginas institucionais, Links gerais ou Redes sociais para editar somente aquela área."
+        />
+        <DeveloperCmsAccordion
+          items={FOOTER_STEPS}
+          openIndex={openFooterStepIndex}
+          onOpenChange={setOpenFooterStepIndex}
+          getEyebrow={(step) => step.step}
+          getTitle={(step) => step.title}
+          variant="services"
+          renderItem={(step) => (
+            step.key === "institutional" ? (
+              <InstitutionalPagesStep
+                content={content}
+                onChange={(mutator) => update(mutator)}
+                onSave={saveSection}
+                saving={saving}
+              />
+            ) : step.key === "footer" ? (
+              <FooterGlobalEditor
+                footer={content.footer}
+                onChange={(footer) => update((draft) => { draft.footer = footer; })}
+                onSave={() => saveSection("footer", content.footer)}
+                saving={saving === "footer"}
+              />
+            ) : (
+              <FooterSocialEditor
+                footer={content.footer}
+                onChange={(footer) => update((draft) => { draft.footer = footer; })}
+                onSave={() => saveSection("footer", content.footer)}
+                saving={saving === "footer"}
+              />
+            )
+          )}
+        />
+      </DeveloperCard>
     </DeveloperPage>
   );
 }
@@ -657,12 +592,7 @@ function InstitutionalPagesStep({
   }
 
   return (
-    <DeveloperCard className="p-4 sm:p-5">
-      <DeveloperSectionHeading
-        eyebrow="Etapa 1"
-        title="Páginas institucionais"
-        description="Edite as páginas acessadas pelo rodapé sem deixar todos os campos abertos ao mesmo tempo."
-      />
+    <div className="space-y-4">
       <div className="mt-4 flex items-center gap-2 rounded-[18px] border border-[var(--primary)]/14 bg-[var(--primary)]/4 p-1.5">
         <div className="grid min-w-0 flex-1 grid-cols-3 gap-1.5" role="tablist" aria-label="Selecionar página institucional">
           {items.map((item, index) => {
@@ -710,7 +640,7 @@ function InstitutionalPagesStep({
         </div>
       </div>
       <div className="mt-4">{renderActiveEditor()}</div>
-    </DeveloperCard>
+    </div>
   );
 }
 
@@ -743,8 +673,7 @@ function FooterGlobalEditor({
   }
 
   return (
-    <DeveloperCard className="p-5 sm:p-6">
-      <DeveloperSectionHeading eyebrow="Etapa 2" title="Links gerais do footer" description="Chamadas, Sua Voz, links institucionais e horários." />
+    <div className="space-y-5">
       <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); onSave(); }}>
         <div className="space-y-5">
         <div className={cn(priorityPanelClassName, "grid gap-5 md:grid-cols-2")}>
@@ -876,7 +805,7 @@ function FooterGlobalEditor({
 
         <SaveButton saving={saving}>Salvar links gerais</SaveButton>
       </form>
-    </DeveloperCard>
+    </div>
   );
 }
 
@@ -892,12 +821,7 @@ function FooterSocialEditor({
   saving: boolean;
 }) {
   return (
-    <DeveloperCard className="p-5 sm:p-6">
-      <DeveloperSectionHeading
-        eyebrow="Etapa 3"
-        title="Redes sociais"
-        description="Controle os links externos do footer em uma área própria."
-      />
+    <div className="space-y-5">
       <form className="space-y-5" onSubmit={(event) => { event.preventDefault(); onSave(); }}>
         <div className={cn(priorityPanelClassName, "space-y-4")}>
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
@@ -931,7 +855,7 @@ function FooterSocialEditor({
         </div>
         <SaveButton saving={saving}>Salvar redes sociais</SaveButton>
       </form>
-    </DeveloperCard>
+    </div>
   );
 }
 

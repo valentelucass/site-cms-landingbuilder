@@ -317,7 +317,8 @@ export default async function ParaEmpresasPage() {
                     external: scaleButtons[1]?.external,
                     variant: "secondary",
                   }}
-                  className="min-h-[60px] w-full min-w-0 flex-1 justify-center border border-slate-700 bg-transparent text-[15px] text-white hover:border-slate-500 hover:bg-slate-800 focus-visible:ring-slate-700/50 sm:w-auto"
+                  tone="dark"
+                  className="min-h-[60px] w-full min-w-0 flex-1 justify-center border border-white/25 bg-white/10 text-[15px] text-white shadow-[0_12px_32px_rgba(2,6,23,0.18)] hover:border-white/40 hover:bg-white/15 focus-visible:ring-white/30 sm:w-auto"
                 />
               </div>
             </div>

@@ -105,7 +105,7 @@ function NotificationCard({ notification, onDismiss }: { notification: Notificat
   }, []);
 
   useEffect(() => {
-    if (tone === "error" || hovered || focused || pageHidden || leaving) return;
+    if (hovered || focused || pageHidden || leaving) return;
     const started = Date.now();
     const timer = window.setTimeout(close, remaining.current);
     return () => {

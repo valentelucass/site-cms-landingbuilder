@@ -3,13 +3,14 @@
 import { useDeveloperNotifier } from "@/components/developer/DeveloperNotifications";
 
 import { useEffect, useMemo, useState } from "react";
-import { CaretDown, CheckCircle, ImageSquare } from "@phosphor-icons/react";
+import { CaretDown, CheckCircle } from "@phosphor-icons/react";
 import { useApiRequest } from "@/hooks/useApiRequest";
 import {
   adminResourceKeys,
   invalidateAdminResource,
 } from "@/hooks/useAdminResource";
 import { DeveloperMediaField, DeveloperMediaPreview } from "@/components/developer/DeveloperMediaField";
+import { DeveloperCmsAccordion } from "@/components/developer/DeveloperCmsAccordion";
 import { MediaPlacementEditor } from "@/components/developer/MediaPlacementEditor";
 import { DeveloperResponsivePreview } from "@/components/developer/DeveloperResponsivePreview";
 import {
@@ -123,9 +124,6 @@ const formGroupClassName =
 const priorityFormGroupClassName =
   "rounded-[22px] border border-[#93c5fd] bg-[linear-gradient(135deg,rgba(219,234,254,0.82)_0%,rgba(239,246,255,0.8)_54%,rgba(248,251,255,0.9)_100%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.88),0_10px_24px_rgba(29,78,216,0.08)] ring-1 ring-[var(--primary)]/7 sm:p-5";
 
-const editableCardClassName =
-  "rounded-[24px] border border-slate-200 bg-slate-50/86 p-4 shadow-[0_12px_28px_rgba(15,23,42,0.045)] sm:p-5";
-
 function SaveButton({
   saving,
   children,
@@ -147,8 +145,8 @@ export default function DeveloperServicesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<SaveKey | "">("");
   const notify = useDeveloperNotifier();
-  const [activeModuleIndex, setActiveModuleIndex] = useState(0);
-  const [moduleFramingOpen, setModuleFramingOpen] = useState(false);
+  const [openModuleIndex, setOpenModuleIndex] = useState<number | null>(0);
+  const [moduleFramingOpen, setModuleFramingOpen] = useState<number | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [previewRevision, setPreviewRevision] = useState(0);
 
@@ -185,8 +183,6 @@ export default function DeveloperServicesPage() {
     }),
     [services]
   );
-
-  const activeModule = services.modules[activeModuleIndex] ?? emptyModule(activeModuleIndex);
 
   async function saveSection(section: SaveKey, endpoint: string, payload: unknown) {
     setSaving(section);
@@ -283,54 +279,18 @@ export default function DeveloperServicesPage() {
               });
             }}
           >
-            <div className="grid gap-2 rounded-[22px] border border-[var(--border)]/80 bg-white/70 p-2 sm:grid-cols-3">
-              {services.modules.map((module, moduleIndex) => {
-                const isActive = moduleIndex === activeModuleIndex;
-                return (
-                  <button
-                    key={module.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveModuleIndex(moduleIndex);
-                      setModuleFramingOpen(false);
-                    }}
-                    className={cn(
-                      "relative rounded-[18px] border px-4 py-3 text-left transition-all duration-200",
-                      "hover:-translate-y-0.5 hover:border-[var(--primary)]/35 hover:bg-white",
-                      isActive
-                        ? "border-[var(--primary)]/38 bg-[linear-gradient(145deg,rgba(255,255,255,0.96)_0%,rgba(219,234,254,0.9)_100%)] shadow-[0_14px_34px_rgba(29,78,216,0.12)]"
-                        : "border-transparent bg-transparent text-[var(--color-muted-raw)]"
-                    )}
-                  >
-                    <span className="block text-[11px] font-semibold uppercase tracking-[0.16em]">
-                      Card fixo {moduleIndex + 1}
-                    </span>
-                    <span className="mt-1 block truncate text-sm font-semibold text-[var(--foreground)]">
-                      {MODULE_LABELS[moduleIndex]}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <article key={activeModule.id} className={editableCardClassName}>
-                <div className="mb-5 flex items-start gap-3 rounded-[18px] border border-[var(--primary)]/16 bg-[linear-gradient(135deg,rgba(219,234,254,0.62)_0%,rgba(255,255,255,0.86)_70%)] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.82)]">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-[var(--primary)]/16 bg-[var(--primary)]/8 text-[var(--primary)]">
-                    <ImageSquare size={20} weight="bold" />
-                  </span>
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">
-                      Card fixo {activeModuleIndex + 1}
-                    </p>
-                    <h3 className="mt-1 text-base font-semibold text-[var(--foreground)]">
-                      {MODULE_LABELS[activeModuleIndex]}
-                    </h3>
-                    <p className="mt-1 text-sm leading-6 text-[var(--color-muted-raw)]">
-                      Conteúdo, imagem e botão do módulo exibido em /servicos.
-                    </p>
-                  </div>
-                </div>
-
+            <DeveloperCmsAccordion
+              items={services.modules}
+              openIndex={openModuleIndex}
+              onOpenChange={(index) => {
+                setOpenModuleIndex(index);
+                setModuleFramingOpen(null);
+              }}
+              getEyebrow={(_, index) => `Card fixo ${index + 1}`}
+              getTitle={(_, index) => MODULE_LABELS[index]}
+              variant="services"
+              renderItem={(activeModule: ServicesModule, activeModuleIndex: number) => (
+                <div className="space-y-4">
                 <div className={priorityFormGroupClassName}>
                   <p className="mb-3 text-sm font-semibold text-[var(--foreground)]">
                     Imagem principal <span className="text-[var(--primary)]">*</span>
@@ -340,7 +300,7 @@ export default function DeveloperServicesPage() {
                       value={activeModule.image.src}
                       previewAlt={activeModule.image.alt || activeModule.eyebrow}
                       mediaType="image"
-                      onFrame={() => setModuleFramingOpen(true)}
+                      onFrame={() => setModuleFramingOpen(activeModuleIndex)}
                       align="start"
                     />
                     <div className="grid gap-4">
@@ -382,8 +342,8 @@ export default function DeveloperServicesPage() {
                     onChange={(presentation) => updateModule(activeModuleIndex, {
                       image: { ...activeModule.image, presentation },
                     })}
-                    open={moduleFramingOpen}
-                    onOpenChange={setModuleFramingOpen}
+                    open={moduleFramingOpen === activeModuleIndex}
+                    onOpenChange={(open) => setModuleFramingOpen(open ? activeModuleIndex : null)}
                     hideTrigger
                   />
                 </div>
@@ -458,7 +418,9 @@ export default function DeveloperServicesPage() {
                     />
                   </DeveloperField>
                 </div>
-            </article>
+                </div>
+              )}
+            />
 
             <SaveButton saving={saving === "modules"}>Salvar módulos</SaveButton>
           </form>

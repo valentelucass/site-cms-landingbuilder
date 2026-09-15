@@ -577,8 +577,8 @@ export function LandingVisualEditor<T extends LandingPreview>({
   function renderPreviewNavigation() {
     return <nav className="mt-3 flex items-center gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-white/70 px-2 py-2 shadow-sm" aria-label="Navegar pela prévia">
       <span className="shrink-0 px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted-raw)]">Ir para</span>
-      <div className="flex min-w-max items-center gap-1" aria-label="Seções da landing">
-        {PREVIEW_SECTION_NAV.map((section) => <button key={section.key} type="button" onClick={() => navigatePreview(section.key)} className="rounded-md px-2 py-1 text-xs font-semibold text-slate-600 transition hover:bg-white hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950/25">{section.label}</button>)}
+      <div className="flex min-w-max items-center gap-1.5" aria-label="Seções da landing">
+        {PREVIEW_SECTION_NAV.map((section) => <button key={section.key} type="button" onClick={() => navigatePreview(section.key)} className="inline-flex min-h-8 items-center rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-px hover:border-[var(--primary)]/35 hover:bg-[var(--primary)]/[0.06] hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/25 active:translate-y-0" aria-label={`Ir para ${section.label}`}>{section.label}</button>)}
       </div>
     </nav>;
   }

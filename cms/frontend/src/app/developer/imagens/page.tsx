@@ -20,6 +20,7 @@ import {
 } from "@/hooks/useAdminResource";
 import { useCarouselPagination } from "@/hooks/useCarouselPagination";
 import { api, resolveCmsMediaUrl } from "@/lib/routes";
+import { DeveloperMediaField } from "@/components/developer/DeveloperMediaField";
 import {
   DeveloperCard,
   DeveloperField,
@@ -28,7 +29,6 @@ import {
   DeveloperMessage,
   DeveloperPage,
   DeveloperSectionHeading,
-  developerSplitLayoutClassName,
   developerInputClassName,
   developerDangerButtonClassName,
   developerPrimaryButtonClassName,
@@ -357,16 +357,17 @@ export default function ImagensPage() {
         </div>
       ) : null}
 
-      <section className={developerSplitLayoutClassName}>
-        <DeveloperCard>
+      <section className="space-y-6">
+        <DeveloperCard className="p-4 sm:p-4 [&_label>span:first-child]:mb-1">
           <DeveloperSectionHeading
             eyebrow="Upload"
             title="Enviar mídia"
-            description="O backend valida imagens e vídeos; imagens recebem WebP e tamanhos responsivos."
+            description="Imagens são otimizadas para WebP; vídeos compatíveis são preservados."
             tooltip="A mídia é validada pela assinatura real. Imagens são otimizadas; vídeos compatíveis são preservados."
+            className="mb-2"
           />
 
-          <div className="space-y-5">
+          <div className="grid items-end gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(240px,0.6fr)_auto]">
             <DeveloperField label="Selecionar arquivo">
               <input
                 type="file"
@@ -412,8 +413,8 @@ export default function ImagensPage() {
                   </div>
                 </button>
               ) : (
-                <div className="flex h-32 max-w-[280px] items-center justify-center rounded-[18px] border border-dashed border-[var(--border)] bg-white/72 px-4 text-center text-sm text-[var(--color-muted-raw)]">
-                  Selecione uma imagem ou video para visualizar o preview.
+                <div className="flex min-h-10 items-center rounded-xl border border-dashed border-[var(--border)] bg-white/72 px-3 text-xs text-[var(--color-muted-raw)]">
+                  O preview aparece após selecionar um arquivo.
                 </div>
               )}
             </div>
@@ -464,44 +465,37 @@ export default function ImagensPage() {
             </button>
           </div>
 
-          <div className="mt-8 border-t border-[var(--border)] pt-8">
+          <div className="mt-4 border-t border-[var(--border)] pt-4">
             <DeveloperSectionHeading
               eyebrow="Substituição"
               title="Trocar referências no conteúdo"
-              description="Atualiza caminhos em conteúdo, textos, slots, SEO e popup."
+              description="Atualiza conteúdo, slots, SEO e popup de uma vez."
               tooltip="Substitui uma URL antiga por outra em todos os storages de conteúdo que usam mídia."
+              className="mb-2"
             />
 
-            <div className="space-y-4">
-              <DeveloperField label="URL atual">
-                <select
-                  value={fromUrl}
-                  onChange={(event) => setFromUrl(event.target.value)}
-                  className={developerInputClassName}
-                >
-                  <option value="">Selecione uma mídia da biblioteca</option>
-                  {images.map((image) => (
-                    <option key={image.url} value={image.url}>
-                      {image.name} - {image.url}
-                    </option>
-                  ))}
-                </select>
-              </DeveloperField>
+            <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+              <DeveloperMediaField
+                label="Mídia atual"
+                helpKey="media-library.field.substitution-source"
+                value={fromUrl}
+                onChange={setFromUrl}
+                availableMedia={images}
+                showPreview={false}
+                showLibraryLink={false}
+                compact
+              />
 
-              <DeveloperField label="Nova URL">
-                <select
-                  value={toUrl}
-                  onChange={(event) => setToUrl(event.target.value)}
-                  className={developerInputClassName}
-                >
-                  <option value="">Selecione uma mídia da biblioteca</option>
-                  {images.map((image) => (
-                    <option key={image.url} value={image.url}>
-                      {image.name} - {image.url}
-                    </option>
-                  ))}
-                </select>
-              </DeveloperField>
+              <DeveloperMediaField
+                label="Nova mídia"
+                helpKey="media-library.field.substitution-target"
+                value={toUrl}
+                onChange={setToUrl}
+                availableMedia={images}
+                showPreview={false}
+                showLibraryLink={false}
+                compact
+              />
 
               <button
                 type="button"
@@ -516,49 +510,42 @@ export default function ImagensPage() {
             </div>
           </div>
 
-          <div className="mt-6 border-t border-[var(--border)] pt-6">
+          <div className="mt-4 border-t border-[var(--border)] pt-4">
             <DeveloperSectionHeading
               eyebrow="Slots"
               title="Imagens controladas pelo CMS"
-              description="O site usa fallback quando um slot fica vazio."
+              description="Slots vazios usam o fallback do site."
               tooltip="Slots conectam uma imagem da biblioteca a uma área do site. Exemplo: Popup - Mobile usa a imagem no popup de celular."
+              className="mb-2"
             />
 
-            <div className="rounded-[22px] border border-[var(--border)] bg-slate-50/70 p-4 sm:p-5">
+            <div className="rounded-xl border border-[var(--border)] bg-slate-50/70 p-2">
               <div className="overflow-hidden">
                 <div
-                  className="flex transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
+                  className="flex items-start transition-transform duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                   style={{ transform: `translateX(-${slotPage * 100}%)` }}
                 >
                   {slotPages.map((page, pageIndex) => (
-                    <div key={pageIndex} className="w-full shrink-0 space-y-3">
+                    <div key={pageIndex} className="grid w-full shrink-0 gap-2 xl:grid-cols-4">
                       {page.map(([slotKey, label]) => (
                         <div
                           key={slotKey}
-                          className="grid gap-3 rounded-2xl border border-slate-200/80 bg-white/82 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] lg:grid-cols-[minmax(190px,0.9fr)_minmax(0,1.1fr)] lg:items-center"
+                          className="rounded-xl border border-slate-200/80 bg-white/82 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]"
                         >
-                          <span className="truncate px-1 text-xs font-semibold text-[var(--foreground)]" title={label}>
-                            {label}
-                          </span>
-                          <select
+                          <DeveloperMediaField
+                            label={label}
                             value={slots[slotKey] ?? ""}
-                            onChange={(event) =>
-                              setSlots((current) => ({ ...current, [slotKey]: event.target.value }))
+                            onChange={(value) =>
+                              setSlots((current) => ({ ...current, [slotKey]: value }))
                             }
-                            className={`${developerInputClassName} min-h-11 px-3 py-2 text-xs`}
-                          >
-                            <option value="">Usar fallback do site</option>
-                            {images
-                              .filter((image) => {
-                                const itemType = image.mediaType ?? mediaTypeFromUrl(image.url);
-                                return itemType === mediaTypeForSlot(slotKey);
-                              })
-                              .map((image) => (
-                                <option key={image.url} value={image.url}>
-                                  {image.name} - {image.url}
-                                </option>
-                              ))}
-                          </select>
+                            availableMedia={images}
+                            mediaType={mediaTypeForSlot(slotKey)}
+                            showPreview={false}
+                            showLibraryLink={false}
+                            emptyLabel="Usar fallback do site"
+                            compact
+                            className="[&>span]:!mb-1"
+                          />
                         </div>
                       ))}
                     </div>
@@ -566,9 +553,9 @@ export default function ImagensPage() {
                 </div>
               </div>
 
-              <div className="mt-5 flex flex-col gap-3 border-t border-[var(--border)]/80 pt-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="mt-2 flex flex-col gap-2 border-t border-[var(--border)]/80 pt-2 lg:flex-row lg:items-center lg:justify-between">
                 {slotTotalPages > 1 ? (
-                  <div className="flex min-h-11 items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-white/78 p-1.5 shadow-[0_8px_20px_rgba(15,23,42,0.04)] lg:min-w-[312px]">
+                  <div className="flex min-h-9 items-center justify-between gap-2 rounded-xl border border-[var(--border)] bg-white/78 p-1 shadow-[0_6px_14px_rgba(15,23,42,0.035)] lg:min-w-[290px]">
                     <button
                       type="button"
                       onClick={prevSlotPage}
@@ -626,7 +613,7 @@ export default function ImagensPage() {
               style={{ transform: `translateX(-${currentPage * 100}%)` }}
             >
               {pages.map((page, index) => (
-                <div key={index} className="h-full w-full shrink-0 grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+                <div key={index} className="h-full w-full shrink-0 grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                   {page.map((image) => {
                     const itemType = image.mediaType ?? mediaTypeFromUrl(image.url);
                     return (

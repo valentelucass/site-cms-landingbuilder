@@ -129,7 +129,7 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
     details: [
       { label: "Onde aparece", value: "No topo visível do painel, inclusive com a página rolada ou um editor aberto." },
       { label: "Leitura", value: "Avisos de sucesso e informação fecham automaticamente após o tempo de leitura. O prazo pausa com o mouse sobre o aviso, com foco de teclado nele ou com a aba do navegador oculta." },
-      { label: "Erros", value: "Permanecem visíveis até você fechar ou tentar a ação novamente. Fechar o aviso não corrige o problema informado." },
+      { label: "Erros", value: "Também fecham automaticamente após o tempo de leitura. Passe o mouse ou mantenha o foco no aviso para pausar esse prazo; fechar o aviso não corrige o problema informado." },
       { label: "Salvamento", value: "O texto informa o resultado da ação. Enviar uma imagem pode apenas selecioná-la no formulário; quando o aviso pedir para salvar, use o botão da seção para publicar a alteração." },
     ],
   },
@@ -248,6 +248,15 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
     summary: "Envie a foto ou o vídeo diretamente nesta área ou escolha uma mídia já enviada para a mesma campanha. Depois do envio, o arquivo fica selecionado na coluna esquerda de “Imagem e conteúdo”; vídeos têm controles e podem usar uma capa.",
     example: "Envie uma foto da operação, descreva o que ela mostra no campo de acessibilidade e ajuste o enquadramento antes de salvar a landing.",
     details: [{ label: "Onde aparece", value: "Na coluna esquerda da seção “Imagem e conteúdo” da rota pública da campanha." }, { label: "Envio e tratamento", value: "A área aceita PNG, JPG/JPEG, WebP e AVIF para fotos; o Landing Builder confere a assinatura real, corrige a orientação, limita a imagem a 2.400 px e grava uma versão WebP otimizada. Links externos não são aceitos.", technical: true }, { label: "Vídeo", value: "Também aceita MP4, WebM e Ogg nesta seção. O vídeo não é convertido e pode receber uma imagem da própria campanha como capa." }, { label: "Acessibilidade", value: "A descrição alternativa é exibida para leitores de tela. Para vídeo, a capa é opcional e os controles permanecem disponíveis ao visitante." }, { label: "Sem mídia", value: "O painel de conteúdo continua visível com uma área neutra à esquerda até uma mídia ser escolhida." }],
+  },
+  "landing-pages.field.video-poster": {
+    title: "Poster do vídeo",
+    summary: "Escolha visualmente uma imagem da Biblioteca da campanha para aparecer como capa do vídeo antes da reprodução. Deixar sem seleção mantém o primeiro quadro como capa.",
+    details: [
+      { label: "Onde aparece", value: "Sobre o vídeo da campanha antes de a pessoa iniciar a reprodução." },
+      { label: "Como escolher", value: "Clique no campo para abrir a Biblioteca com miniaturas e escolha uma imagem; não é necessário localizar ou copiar URLs." },
+      { label: "Sem poster", value: "Use “Usar primeiro quadro do vídeo” quando o próprio vídeo já tiver uma abertura adequada como capa." },
+    ],
   },
   "landing-pages.field.showcase-background": {
     title: "Foto de fundo das soluções",
@@ -605,6 +614,24 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
       { label: "Após salvar", value: "O item aparece quando está ativo e fica oculto quando desativado." },
     ],
   },
+  "media-library.field.substitution-source": {
+    title: "Mídia atual",
+    summary: "Escolha visualmente o arquivo que será trocado no conteúdo já publicado. A seleção abre a Biblioteca com miniaturas, sem expor ou exigir a URL do arquivo.",
+    details: [
+      { label: "O que escolher", value: "Selecione a imagem ou o vídeo que hoje aparece no conteúdo, nos slots, no SEO ou no popup." },
+      { label: "Como escolher", value: "Clique no campo para abrir a Biblioteca, localize o arquivo pela miniatura e confirme-o com um clique." },
+      { label: "Após substituir", value: "O arquivo escolhido aqui deixa de ser usado nos locais que receberem a nova mídia." },
+    ],
+  },
+  "media-library.field.substitution-target": {
+    title: "Nova mídia",
+    summary: "Escolha visualmente o arquivo que substituirá a mídia atual em todos os locais encontrados pelo CMS.",
+    details: [
+      { label: "O que escolher", value: "Selecione na Biblioteca a imagem ou o vídeo que deve passar a aparecer no lugar da mídia atual." },
+      { label: "Como escolher", value: "Clique no campo para abrir a Biblioteca e escolha o arquivo pela miniatura." },
+      { label: "Após substituir", value: "Ao salvar a substituição, conteúdo, slots, SEO e popup que usavam a mídia atual passam a apontar para este arquivo." },
+    ],
+  },
   "global.section.configuracoes": {
     details: [
       { label: "O que reúne", value: "Os campos que editam uma mesma parte da tela atual." },
@@ -895,6 +922,36 @@ const CMS_HELP_TEMPLATES: Record<string, CmsHelpTemplate> = {
       { label: "Onde aparece", value: "No card visual do módulo correspondente na página pública /servicos." },
       { label: "Após salvar", value: "Troca a imagem apenas desse módulo; os outros cards de serviços não são alterados." },
       { label: "Proteção", value: "Links externos e arquivos inexistentes não podem ser gravados nesse campo.", technical: true },
+    ],
+  },
+  "about.section.pagina-sobre": {
+    title: "Página Sobre",
+    summary: "Abra Hero, Governança ou CTA final para editar somente aquela parte da página /sobre. Um editor aberto recolhe o anterior e suas alterações continuam no formulário até você salvar.",
+    example: "Abra Governança para trocar certificados e use Salvar governança quando terminar, sem misturar os campos do Hero ou do CTA final.",
+    details: [
+      { label: "Onde aparece", value: "Hero, Governança e CTA final compõem áreas diferentes da página pública /sobre." },
+      { label: "Como usar", value: "Selecione o cabeçalho da seção para abrir ou fechar seus campos. Abrir outra seção recolhe a anterior, sem descartar alterações ainda não salvas." },
+      { label: "Após salvar", value: "Cada botão de salvar publica apenas a seção que ele identifica." },
+    ],
+  },
+  "footer-links.section.areas-do-rodape": {
+    title: "Áreas do rodapé",
+    summary: "Abra Páginas institucionais, Links gerais do footer ou Redes sociais para editar somente aquela área. Alternar o acordeão não apaga alterações que ainda precisam ser salvas.",
+    example: "Abra Redes sociais para atualizar Instagram e LinkedIn e use Salvar redes sociais quando terminar, sem misturar os links gerais ou as páginas institucionais.",
+    details: [
+      { label: "Onde aparece", value: "Essas três áreas controlam o rodapé público e as páginas /termos-de-uso, /central-ajuda e /privacidade." },
+      { label: "Como usar", value: "Selecione o cabeçalho da área para abrir ou fechar seus campos. Abrir outra área recolhe a anterior e conserva o que ainda não foi salvo." },
+      { label: "Após salvar", value: "Cada botão de salvar publica apenas a área indicada por ele." },
+    ],
+  },
+  "servicos.section.modulos-de-servico": {
+    title: "Módulos de serviço",
+    summary: "Abra o módulo que deseja editar para ajustar sua imagem, textos, tópicos e botão. Apenas um dos três cards fixos de /servicos fica aberto por vez, deixando a tela mais fácil de percorrer.",
+    example: "Abra “Operação indoor”, atualize sua foto e descrição e depois use Salvar módulos para publicar somente essas alterações.",
+    details: [
+      { label: "Onde aparece", value: "Os três módulos são cards fixos na seção de módulos da página pública /servicos." },
+      { label: "Como usar", value: "Selecione o cabeçalho do card para abrir ou fechar os campos. Abrir outro card recolhe o anterior, sem apagar alterações ainda não salvas." },
+      { label: "Após salvar", value: "O botão Salvar módulos publica as alterações de todos os módulos que foram editados nesta seção." },
     ],
   },
   "servicos.field.texto-alternativo-da-imagem": {
