@@ -177,15 +177,17 @@ export default async function HomePage() {
                   className={`group/card flex w-[170px] shrink-0 flex-col items-center justify-center gap-3 transition-all duration-500 hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:w-[200px] lg:w-[220px] ${index >= certs.length ? "certifications-marquee-copy" : ""}`}
                   aria-hidden={index >= certs.length ? true : undefined}
                 >
-                  <img
-                    src={cert.src}
-                    alt={index < certs.length ? cert.alt : ""}
-                    width={340}
-                    height={176}
-                    className="h-auto w-[150px] grayscale object-contain opacity-55 transition-all duration-500 group-hover/card:scale-[1.08] group-hover/card:grayscale-0 group-hover/card:opacity-100 motion-reduce:transition-none motion-reduce:group-hover/card:scale-100 sm:w-[170px]"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <div className="flex h-[92px] w-[150px] items-center justify-center sm:h-[104px] sm:w-[170px]">
+                    <img
+                      src={cert.src}
+                      alt={index < certs.length ? cert.alt : ""}
+                      width={340}
+                      height={176}
+                      className="max-h-full max-w-full grayscale object-contain opacity-55 transition-all duration-500 group-hover/card:scale-[1.08] group-hover/card:grayscale-0 group-hover/card:opacity-100 motion-reduce:transition-none motion-reduce:group-hover/card:scale-100"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </div>
                   <span className="text-[13px] font-semibold tracking-[0.02em] text-slate-400 transition-colors duration-500 group-hover/card:text-[var(--primary)]">
                     {cert.title}
                   </span>
