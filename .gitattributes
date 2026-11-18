@@ -1,3 +1,4 @@
 *.bat text eol=crlf
 *.cmd text eol=crlf
 site/frontend/public/*.svg text eol=lf
+graphify-out/graph.json merge=graphify

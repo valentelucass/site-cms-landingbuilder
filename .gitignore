@@ -151,3 +151,9 @@ temp/
 .tmp-*.html
 .tmp-*.png
 tmp-dna-*.png
+
+# Saídas e configuração local das ferramentas MCP.
+graphify-out/
+.graphify/
+AGENTS.md.bak-*
+*.mcp-tools.tmp
