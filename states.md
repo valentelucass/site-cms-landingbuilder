@@ -1,5 +1,7 @@
 # Estado Atual do Sistema — Site Rodogarcia
 
+O procedimento para atribuir crescimento de disco aos volumes JSON e conferir a página que consome o conteúdo está na [operação de produção](docs/operacao-producao.md#quando-o-espaço-livre-da-vm-oscilar).
+
 ## Hostname da VM — alinhamento em 2026-10-02
 
 VM atual: `ROD-SRVW-001`; conta Windows local `ROD-SRVW-001\suporte`. Scripts e ecosystems examinados não contêm dependência ativa de `WIN-00NEDIJ1R5P`; endereços loopback e hostnames públicos continuam válidos. Diretórios privados `C:\CloudflareMigracao\preparado-WIN-00NEDIJ1R5P` são caminhos existentes, não o nome atual da máquina, e devem ser preservados. O snapshot compartilhado foi ampliado para 14 processos PROD, incluindo os seis deste monorepo, após autorização humana. Site/CMS/Builder usam instalação nova expressamente autorizada, sem dados privados antigos. Recuperação automática, administrador supremo e evidências estão nos registros operacionais ao final deste arquivo.

@@ -23,6 +23,12 @@ O volume canônico é `site/backend/storage`; não copie JSON, uploads, sessões
 
 Antes de backup, restore ou alteração manual do storage, pare os writers na janela de manutenção. Nunca exponha `site/backend/storage/private/**` nem uploads por canais privados indevidos.
 
+## Quando o espaço livre da VM oscilar
+
+O Site e o CMS persistem JSON e mídia nos volumes configurados. O Builder tem seu próprio escritor e volume. Para investigar o consumo, anotar o horário, o espaço livre da unidade e os tamanhos dos diretórios de conteúdo, uploads e backups antes e depois da operação. Identificar a localização física das junções para contar cada conjunto de arquivos uma só vez.
+
+Se o espaço também oscilar enquanto o SQL ou o backup da VM estiver ativo, comparar os horários e o crescimento de cada arquivo. Uma queda do espaço livre no C pode ocorrer enquanto os arquivos SQL mantêm o mesmo tamanho. Na conferência do site, registrar a leitura de uma página pública e a existência do conteúdo ou mídia que ela referencia. O aceite de recuperação usa uma cópia em destino separado e a conferência do manifesto e dos arquivos. [Backup e restauração do JSON](backup-restore-json.md)
+
 ## Ambiente
 
 Na VM, crie `.env.production.local` a partir de `.env.production.example`. Preencha ao menos:
