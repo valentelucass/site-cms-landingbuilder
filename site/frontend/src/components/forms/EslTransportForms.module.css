@@ -1,161 +1,268 @@
-@property --quote-kind-border-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
+.blue, .card[data-kind="closed"] {
+  --quote-ink: #164faf;
+  --quote-accent: #296ae5;
+  --quote-surface: #eff6ff;
+  --quote-option: #dcecff;
+  --quote-border: #9abff0;
 }
 
-.quoteKindCardSelected {
-  --quote-kind-border-angle: 0deg;
-  border: 2px solid transparent;
-  background:
-    linear-gradient(#ffffff, #ffffff) padding-box,
-    conic-gradient(
-      from var(--quote-kind-border-angle),
-      var(--quote-kind-primary),
-      var(--quote-kind-accent),
-      var(--quote-kind-soft),
-      var(--quote-kind-accent),
-      var(--quote-kind-primary)
-    ) border-box;
-  box-shadow:
-    0 0 0 1px var(--quote-kind-ring),
-    0 18px 34px var(--quote-kind-shadow),
-    0 8px 18px var(--quote-kind-shadow-soft);
-  transform: translateY(-3px) scale(1.008);
-  animation:
-    quote-kind-border-spin 3.6s linear infinite,
-    quote-kind-card-enter 460ms cubic-bezier(0.16, 1, 0.3, 1);
+.green, .card[data-kind="fractional"] {
+  --quote-ink: #116443;
+  --quote-accent: #098852;
+  --quote-surface: #effbf5;
+  --quote-option: #d4f7e3;
+  --quote-border: #88d6ac;
+}
+
+.field {
+  min-width: 0;
+  border-color: var(--form-border);
+  background-color: var(--form-field);
+}
+
+.field::placeholder {
+  color: #4b5b6b;
+  opacity: 1;
+}
+
+.field[readonly] {
+  cursor: default;
+  background-color: color-mix(in srgb, var(--form-field), var(--form-panel));
+  color: var(--color-foreground-soft);
 }
 
 .quoteKindCard {
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.045);
-  transition:
-    border-color 420ms cubic-bezier(0.16, 1, 0.3, 1),
-    background 420ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 420ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: box-shadow, transform;
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr) 1.25rem;
+  align-items: center;
+  gap: .8rem;
+  padding: 1.05rem;
+  border: 1px solid var(--quote-border);
+  border-radius: 1rem;
+  cursor: pointer;
+  background-color: color-mix(in srgb, var(--quote-surface) 50%, white);
+  transition: background-color 180ms, border-color 180ms, box-shadow 180ms;
+}
+.quoteKindCard:hover { background-color: var(--quote-option); border-color: var(--quote-accent); }
+.quoteKindCard:has(:checked) {
+  border-color: var(--quote-accent);
+  background-color: var(--quote-option);
+  box-shadow: inset 0 0 0 1px var(--quote-accent);
+}
+.quoteKindCard:has(:focus-visible) { outline: 2px solid var(--quote-accent); outline-offset: 2px; }
+.kindIcon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: .7rem; background: var(--quote-option); color: var(--quote-ink); }
+.quoteKindCard:has(:checked) .quoteKindCard:has(:focus-visible) { outline: 2px solid var(--quote-accent); outline-offset: 2px; }
+.kindIcon { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; border-radius: .7rem; background: var(--quote-accent); color: #fff; }
+
+.submit {
+  background-color: var(--form-accent);
+  color: var(--primary-foreground);
 }
 
-.quoteKindCardFractional {
-  --quote-kind-primary: #059669;
-  --quote-kind-accent: #10b981;
-  --quote-kind-soft: #6ee7b7;
-  --quote-kind-ring: rgba(5, 150, 105, 0.16);
-  --quote-kind-shadow: rgba(5, 150, 105, 0.18);
-  --quote-kind-shadow-soft: rgba(16, 185, 129, 0.09);
+.submit:enabled:hover {
+  background-color: color-mix(in srgb, var(--form-accent) 82%, var(--foreground));
 }
 
-.quoteKindCardClosed {
-  --quote-kind-primary: #2563eb;
-  --quote-kind-accent: #38bdf8;
-  --quote-kind-soft: #93c5fd;
-  --quote-kind-ring: rgba(37, 99, 235, 0.16);
-  --quote-kind-shadow: rgba(37, 99, 235, 0.18);
-  --quote-kind-shadow-soft: rgba(56, 189, 248, 0.09);
+.secondaryAction {
+  border-color: var(--form-border);
+  background-color: var(--form-field);
+  color: var(--form-accent);
 }
 
-.quoteFieldset {
-  position: relative;
-  isolation: isolate;
-  background: rgba(248, 250, 252, 0.82);
-  transition:
-    border-color 700ms cubic-bezier(0.16, 1, 0.3, 1) var(--quote-fieldset-delay, 0ms),
-    box-shadow 700ms cubic-bezier(0.16, 1, 0.3, 1) var(--quote-fieldset-delay, 0ms);
-  will-change: border-color, box-shadow;
+.secondaryAction:enabled:hover {
+  border-color: var(--form-accent);
+  background-color: var(--form-option);
 }
 
-.quoteFieldset::before,
-.quoteFieldset::after {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  border-radius: inherit;
-  content: "";
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.975);
-  transition:
-    opacity 720ms cubic-bezier(0.16, 1, 0.3, 1) var(--quote-fieldset-delay, 0ms),
-    transform 720ms cubic-bezier(0.16, 1, 0.3, 1) var(--quote-fieldset-delay, 0ms);
-  will-change: opacity, transform;
+:is(.field, .quoteKindCard, .submit, .secondaryAction):focus-visible {
+  outline: 2px solid var(--form-accent);
+  outline-offset: 3px;
 }
 
-.quoteFieldset::before {
-  background: linear-gradient(135deg, rgba(209, 250, 229, 0.9), rgba(236, 253, 245, 0.84) 58%, rgba(255, 255, 255, 0.9));
-  transform-origin: left center;
-}
-
-.quoteFieldset::after {
-  background: linear-gradient(135deg, rgba(219, 234, 254, 0.92), rgba(240, 249, 255, 0.86) 58%, rgba(255, 255, 255, 0.9));
-  transform-origin: right center;
-}
-
-.quoteFieldset > * {
-  position: relative;
-  z-index: 1;
-}
-
-.quoteFieldsetNeutral {
-  border-color: rgba(226, 232, 240, 0.85);
-  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.045);
-}
-
-.quoteFieldsetFractional {
-  border-color: rgba(110, 231, 183, 0.8);
-  box-shadow: 0 16px 34px rgba(5, 150, 105, 0.1);
-}
-
-.quoteFieldsetFractional::before {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.quoteFieldsetClosed {
-  border-color: rgba(147, 197, 253, 0.84);
-  box-shadow: 0 16px 34px rgba(37, 99, 235, 0.1);
-}
-
-.quoteFieldsetClosed::after {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.quoteKindCard:not(.quoteKindCardSelected):hover {
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.075);
-  transform: translateY(-1px);
-}
-
-@keyframes quote-kind-border-spin {
-  to {
-    --quote-kind-border-angle: 360deg;
+@media (prefers-reduced-motion: reduce) {
+  .quoteKindCard {
+    transition: none;
   }
 }
 
-@keyframes quote-kind-card-enter {
-  from {
-    box-shadow:
-      0 0 0 0 rgba(37, 99, 235, 0),
-      0 6px 14px rgba(15, 23, 42, 0.045);
-    transform: translateY(0) scale(0.992);
+.card {
+  --foreground: #102640;
+  --color-foreground-soft: #435774;
+  --color-muted-raw: #435774;
+  --muted-foreground: #435774;
+  --form-panel: #f3f7fc;
+  --form-field: #fff;
+  --form-option: #eaf1fb;
+  --form-border: #8799ae;
+  --form-accent: #204eb4;
+  --panel-gutter: clamp(1rem, 3vw, 2.25rem);
+  max-width: 60rem;
+  margin-inline: auto;
+  scroll-margin-top: 6rem;
+  border: 1px solid #ced9e7;
+  border-radius: 1.5rem;
+  background: #fff;
+  box-shadow: 0 18px 58px rgb(0 8 25 / 22%);
+  color: var(--foreground);
+  color-scheme: light;
+}
+
+.progress {
+  padding: .7rem var(--panel-gutter) 1.05rem;
+  border-bottom: 1px solid #dce5f1;
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: linear-gradient(180deg, #fafcff, #f1f5fa);
+}
+.progress ol {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.progress li > :is(span, button) {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
+  border-radius: .4rem;
+  color: #596b81;
+  font: 500 .875rem/1.25 var(--font-display);
+}
+.track {
+  height: 3px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #d4deeb;
+}
+.track i {
+  display: block;
+  height: 100%;
+  background: #2557cc;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.progress [aria-current="step"] > span { color: #143f9e; font-weight: 700; }
+.progress [aria-current="step"] .track i, .progress [data-complete] .track i { transform: scaleX(1); }
+.progress [data-complete] .track i { background: #7b9ccc; }
+.progress [data-complete] button { color: #3c5c89; }
+.progress button:enabled:hover { color: #153e93; background: #e7eef8; }
+
+.body { --entry-offset: .65rem; padding: clamp(1.25rem, 3vw, 2rem) var(--panel-gutter); }
+.body[data-direction="back"] { --entry-offset: -.65rem; }
+.heading { margin-bottom: 1.4rem; }
+.heading h2 {
+  margin: .3rem 0 .4rem;
+  font: 700 clamp(1.4rem, 2.6vw, 1.85rem)/1.15 var(--font-display);
+  letter-spacing: -.035em;
+}
+.heading p:last-child { color: var(--color-muted-raw); font-size: .9rem; line-height: 1.5; }
+.card input, .card textarea {
+  min-width: 0;
+  min-height: 2.8rem;
+  border: 1px solid var(--form-border);
+  border-radius: .65rem;
+  background-color: #fff;
+  color: var(--foreground);
+  transition: border-color 160ms, box-shadow 160ms;
+}
+.card .kindRadio {
+  appearance: auto;
+  width: 1.15rem;
+  height: 1.15rem;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  accent-color: var(--quote-accent);
+  cursor: pointer;
+}
+.progressIntro { margin: .3rem 0 .15rem; text-align: center; color: #42566c; font-size: .85rem; }
+.card input::placeholder { color: #5f7086; opacity: 1; }
+.card input:hover { border-color: #536f92; }
+.card input:focus-visible, .card textarea:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+.card :is(button, a):focus-visible { outline: 2px solid #1d4ed8; outline-offset: 3px; }
+.card input[readonly] { background: #eef3f9; }
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  border-top: 1px solid #dae3ef;
+  border-radius: 0 0 1.5rem 1.5rem;
+  background: #f6f9fc;
+  padding: 1rem var(--panel-gutter);
+}
+.footer :is(button[type="submit"],button[type="button"]) { min-height: 2.85rem; min-width: 0; border-radius: .72rem; }
+.footer button[type="submit"] { margin-inline-start: auto; padding-inline: 1.4rem; background: var(--primary); color: #fff; }
+.footer button[type="submit"]:enabled:hover { background: #193fac; }
+.card .summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem 2.5rem;
+  margin: 0 0 1.2rem;
+  padding: .85rem 1.1rem;
+  background: #eef4fc;
+  border-inline-start: 3px solid #4b78c8;
+  border-radius: .35rem;
+}
+.summary dt { color: #435774; font-size: .75rem; }
+.summary dd { margin: .1rem 0 0; font-size: .9rem; font-weight: 600; overflow-wrap: anywhere; }
+.card .secondary { border-color: #a6b9d2; background: #f5f8fd; color: #244b8f; }
+.card .secondary:enabled:hover { background: #e6effc; }
+.result { padding: 2.5rem var(--panel-gutter); text-align: center; }
+.result p { color: var(--foreground); }
+
+.card[data-kind] {
+  --form-accent: var(--quote-ink);
+  border-color: var(--quote-border);
+  background-color: color-mix(in srgb, var(--quote-surface) 75%, white);
+  box-shadow: 0 12px 32px rgb(28 55 75 / 12%);
+}
+.card[data-kind] .progress, .card[data-kind] .footer {
+  border-color: var(--quote-border);
+  background: var(--quote-option);
+}
+.card[data-kind] .track { background: color-mix(in srgb, var(--quote-border) 60%, white); }
+.card[data-kind] .track i { background: var(--quote-accent); }
+.card[data-kind] [data-complete] .track i { background: var(--quote-border); }
+.card[data-kind] .progress [aria-current="step"] > span,
+.card[data-kind] .progress button { color: var(--quote-ink); }
+.card[data-kind] .footer button[type="submit"] { background: var(--quote-ink); }
+.card[data-kind] .footer button[type="submit"]:enabled:hover { background: color-mix(in srgb, var(--quote-ink) 85%, black); }
+.card[data-kind] .secondary { border-color: var(--quote-border); background: white; color: var(--quote-ink); }
+.card[data-kind] input:focus-visible,
+.card[data-kind] :is(button, a):focus-visible { outline-color: var(--quote-accent); }
+
+@media (max-width: 36rem) {
+  .card { border-radius: 1.15rem; }
+  .progress { padding: .35rem .65rem .8rem; border-radius: 1.15rem 1.15rem 0 0; }
+  .progress ol { grid-template-columns: 1fr 1fr 1.3fr 1fr; gap: 3px; }
+  .progress li > :is(span, button) { font-size: clamp(.68rem, 2.9vw, .8rem); gap: .15rem; }
+  .progress button svg { display: none; }
+  .card input { font-size: 1rem; }
+  .footer { border-radius: 0 0 1.15rem 1.15rem; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card[data-kind], .card[data-kind] .progress, .card[data-kind] .footer { transition: background-color 220ms ease-out, border-color 220ms ease-out; }
+  .track i { transition: transform 420ms cubic-bezier(.25,.64,.3,1), background-color 250ms; }
+  .progress [aria-current="step"] > span { animation: light-label 420ms ease-out both; }
+  @keyframes light-label { from { color: #596b81; } to { color: var(--form-accent); } }
+  .body, .result { animation: enter-step 240ms cubic-bezier(.18,.72,.28,1) both; }
+  @keyframes enter-step {
+    from { opacity: .3; transform: translateX(var(--entry-offset, 0)); }
+    to { opacity: 1; transform: translateX(0); }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .quoteKindCardSelected {
-    animation: none;
-  }
-
-  .quoteKindCard,
-  .quoteKindCardSelected,
-  .quoteFieldset {
-    animation: none;
-    transition: none;
-    transform: none;
-  }
-
-  .quoteFieldset::before,
-  .quoteFieldset::after {
-    transition: none;
-  }
+  .card input, .card textarea { transition: none; }
 }

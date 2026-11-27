@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Truck } from "@phosphor-icons/react/dist/ssr";
+import { QuoteRequestLink } from "@/components/forms/QuoteRequestLink";
 import { EslCollectionForm } from "@/components/forms/EslTransportForms";
 import { OperationGuidanceAccordion } from "@/components/internal/OperationGuidanceAccordion";
-import { ActionLink, PageContainer, PageSection, PageShell } from "@/components/internal/PageContent";
+import { PageContainer, PageSection, PageShell, SemanticLink } from "@/components/internal/PageContent";
 import { fetchPublicContent } from "@/lib/api";
 import { buildCmsMetadata } from "@/lib/cmsPublic";
 import { external, seo, site } from "@/lib/routes";
@@ -66,39 +66,41 @@ export default async function CollectionsPage() {
 
   return (
     <PageShell className="!pb-0">
-      <div className="relative overflow-hidden bg-slate-950">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.18),transparent_60%)]" />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.04] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
-        <section className="relative pt-20 sm:pt-24 lg:pt-28" aria-labelledby="coletas-hero-title">
+      <div className="relative isolate min-h-[100svh] bg-slate-950">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 opacity-[0.04] [background-image:linear-gradient(rgba(255,255,255,0.2)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.2)_1px,transparent_1px)] [background-size:32px_32px]" />
+        <section className="relative pt-[7.25rem] sm:pt-[8.5rem]" aria-labelledby="coletas-hero-title">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,rgba(29,78,216,0.18),transparent_60%)]" />
           <PageContainer>
-            <div className="mx-auto max-w-[920px] py-10 text-center sm:py-12 lg:py-16">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200/80 backdrop-blur-sm"><Truck size={15} weight="bold" />Agendamento de coleta</span>
-              <h1 id="coletas-hero-title" className="mx-auto mt-6 max-w-[15ch] text-[clamp(3rem,8vw,6rem)] font-bold leading-[0.9] tracking-[-0.05em] sm:max-w-[18ch] sm:tracking-[-0.07em]">
-                <span className="block bg-[linear-gradient(180deg,#a5f3fc_0%,#dbeafe_100%)] bg-clip-text text-transparent">Agende sua coleta</span>
-                <span className="mt-1 block text-white">com mais clareza.</span>
-              </h1>
-              <p className="mx-auto mt-5 max-w-[44rem] text-sm leading-7 text-white/68 sm:text-base">Informe a operação, valide a nota fiscal e receba o número da coleta registrada. Se o cadastro exigir atendimento, nós direcionamos o próximo passo.</p>
-              <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
-                {collectionsPage.hero.buttons.slice(0, 2).map((button, index) => (
-                  <ActionLink key={`${button.label}-${button.url}`} action={{ label: button.label, href: button.url, variant: index === 1 ? "secondary" : "primary" }} tone="dark" className="w-full min-w-0 sm:w-auto" />
+            <div className="mx-auto max-w-2xl pb-5 text-center sm:pb-6">
+              <h1 id="coletas-hero-title" className="text-[clamp(2.15rem,4.2vw,3.25rem)] font-bold leading-[1.08] tracking-[-0.045em] text-white">Agende sua coleta</h1>
+              <p className="mt-2 text-sm leading-relaxed text-slate-300">Retiradas na nossa área de cobertura.</p>
+              <div className="mt-5 flex flex-wrap items-center justify-center gap-3 sm:gap-5">
+                {collectionsPage.hero.buttons.slice(0, 2).map((button) => (
+                  button.url === site.quote ? (
+                    <QuoteRequestLink key={button.url} button={button} outlined />
+                  ) : (
+                    <SemanticLink key={button.url} href={button.url} external={button.external} className="inline-flex min-h-11 items-center rounded-sm px-1 text-sm font-medium text-slate-300 underline-offset-4 transition-colors hover:text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-200">
+                      {button.label}
+                    </SemanticLink>
+                  )
                 ))}
               </div>
             </div>
           </PageContainer>
         </section>
+
+        <PageSection className="pb-14 pt-3 sm:pb-16 sm:pt-4 lg:pb-20 lg:pt-5">
+          <PageContainer>
+            <div id="formulario-coleta" className="scroll-mt-28">
+              <EslCollectionForm unservedOrigin={unservedOrigin} />
+            </div>
+          </PageContainer>
+        </PageSection>
       </div>
 
-      <PageSection className="bg-[linear-gradient(180deg,#f8fafc_0%,#eaf1f9_100%)]">
+      <PageSection className="bg-[var(--color-form-backdrop,#dce5ed)] [--color-muted-raw:var(--color-foreground-soft)]">
         <PageContainer>
-          <div id="formulario-coleta" className="scroll-mt-28">
-            <p className="mb-6 text-center text-sm font-medium text-[var(--color-muted-raw)]">Preencha os dados da operação para agendar a coleta.</p>
-            <EslCollectionForm unservedOrigin={unservedOrigin} />
-          </div>
-          <div className="mt-16 sm:mt-20">
-            <OperationGuidanceAccordion
-              {...collectionsPage.operationGuidance}
-            />
-          </div>
+          <OperationGuidanceAccordion {...collectionsPage.operationGuidance} />
         </PageContainer>
       </PageSection>
     </PageShell>

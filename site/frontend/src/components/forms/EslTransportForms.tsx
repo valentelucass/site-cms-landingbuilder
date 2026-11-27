@@ -1,7 +1,10 @@
 "use client";
 
-import { useMemo, useRef, useState, type ChangeEvent, type CSSProperties, type ReactNode } from "react";
+import { cloneElement, useEffect, useId, useMemo, useRef, useState, type ChangeEvent, type ReactElement, type ReactNode } from "react";
 import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
   CheckCircle,
   ClipboardText,
   Copy,
@@ -29,7 +32,7 @@ type RequestStatus = "idle" | "loading" | "success" | "error";
 type QuoteKind = "fractional" | "closed";
 
 interface QuoteValues {
-  kind: QuoteKind;
+  kind: QuoteKind | "";
   customerCnpj: string;
   senderCnpj: string;
   recipientCnpj: string;
@@ -127,10 +130,32 @@ interface CollectionWhatsappResponse {
 }
 
 const fieldClassName =
-  "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-slate-400 shadow-[inset_0_1px_0_rgba(15,23,42,0.03)] outline-none transition-all duration-200 focus:border-[var(--primary)]/45 focus:ring-4 focus:ring-[var(--primary)]/12";
+  `${styles.field} w-full rounded-2xl border px-4 py-3 text-sm text-[var(--foreground)]`;
 
 const sectionTitleClassName =
-  "text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--primary)]";
+  "text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--form-accent)]";
+
+const collectionSteps = [
+  { id: "operation", label: "Operação", title: "Dados da operação", description: "Informe os CNPJs do cliente e do local de coleta, a cidade e a UF de origem." },
+  { id: "address", label: "Endereço", title: "Endereço de entrega", description: "Confira o endereço preenchido pelo CNPJ ou digite os dados de entrega." },
+  { id: "schedule", label: "Programação", title: "Quando podemos retirar?", description: "Escolha a data e o intervalo de horário em que a carga estará disponível." },
+  { id: "invoice", label: "Nota fiscal", title: "Conferir e solicitar", description: "A nota fiscal é opcional. Para vinculá-la, informe a chave ou o número e consulte a NF com o CNPJ do remetente ou do destinatário." },
+] as const;
+
+const quoteSteps = [
+  { id: "operation", label: "Operação", title: "Selecione o tipo de carga", description: "Em seguida, informe o CNPJ de quem paga o frete." },
+  { id: "route", label: "Trajeto", title: "Origem e destino", description: "Informe os CEPs e confira as cidades e os estados do trajeto." },
+  { id: "cargo", label: "Carga", title: "Dados da carga", description: "Informe a quantidade e as medidas de cada volume, o peso total e o valor da nota." },
+  { id: "contact", label: "Contato", title: "Dados do solicitante", description: "Informe quem deve receber o retorno sobre esta cotação." },
+] as const;
+
+const collectionCnpjInput = {
+  inputMode: "numeric",
+  minLength: 18,
+  maxLength: 18,
+  autoComplete: "off",
+  className: fieldClassName,
+} as const;
 
 const fieldHelp: Record<string, string> = {
   "CNPJ do cliente e pagador": "Informe os 14 números do CNPJ da empresa cliente, que também será usada como responsável pelo pagamento do frete. A pontuação é aplicada automaticamente.",
@@ -173,7 +198,7 @@ const fieldHelp: Record<string, string> = {
 };
 
 const defaultQuoteValues: QuoteValues = {
-  kind: "fractional",
+  kind: "",
   customerCnpj: "",
   senderCnpj: "",
   recipientCnpj: "",
@@ -260,54 +285,20 @@ function Field({
 }: {
   label: string;
   required?: boolean;
-  children: ReactNode;
+  children: ReactElement<{ id?: string; required?: boolean; "aria-describedby"?: string }>;
   className?: string;
 }) {
-  const help = fieldHelp[label] ?? `Informe ${label.toLocaleLowerCase("pt-BR")} para seguir com a solicitação.`;
+  const id = useId();
+  const help = fieldHelp[label];
   return (
-    <label className={`block ${className}`}>
-      <span className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-[var(--foreground)]">
-        {label}
-        {required ? <span className="text-[var(--primary)]"> *</span> : null}
-        <HelpTooltip content={help} />
-      </span>
-      {children}
-    </label>
-  );
-}
-
-function Fieldset({
-  title,
-  description,
-  children,
-  className = "",
-  tone = "neutral",
-  transitionIndex = 0,
-}: {
-  title: string;
-  description?: string;
-  children: ReactNode;
-  className?: string;
-  tone?: "neutral" | QuoteKind;
-  transitionIndex?: number;
-}) {
-  const toneClassName = tone === "fractional"
-    ? styles.quoteFieldsetFractional
-    : tone === "closed"
-      ? styles.quoteFieldsetClosed
-      : styles.quoteFieldsetNeutral;
-  return (
-    <fieldset
-      className={`grid gap-5 rounded-[28px] border p-5 sm:p-6 ${styles.quoteFieldset} ${toneClassName} ${className}`}
-      style={{ "--quote-fieldset-delay": `${transitionIndex * 70}ms` } as CSSProperties}
-    >
-      <legend className="sr-only">{title}</legend>
-      <div>
-        <p className={sectionTitleClassName}>{title}</p>
-        {description ? <p className="mt-1 text-sm leading-6 text-[var(--color-muted-raw)]">{description}</p> : null}
+    <div className={`min-w-0 ${className}`}>
+      <div className="mb-1 flex min-h-6 items-center gap-1 text-sm font-medium text-[var(--foreground)]">
+        <label htmlFor={id}>{label}{required && <span className="text-[var(--form-accent)]"> *</span>}</label>
+        <HelpTooltip label={label} content={help} />
       </div>
-      {children}
-    </fieldset>
+      <span id={`${id}-help`} className="sr-only">{help}</span>
+      {cloneElement(children, { id, required, "aria-describedby": `${id}-help` })}
+    </div>
   );
 }
 
@@ -347,7 +338,7 @@ function MessageActions({
 
   return (
     <div className="mt-6">
-      <textarea value={message} readOnly rows={7} aria-label="Mensagem preparada para atendimento" className="w-full resize-none rounded-2xl border border-[var(--border)] bg-white/78 p-4 text-left text-xs leading-5 text-[var(--foreground)] outline-none" />
+      <textarea value={message} readOnly rows={7} aria-label="Mensagem preparada para atendimento" className={`${styles.field} w-full resize-none rounded-2xl border p-4 text-left text-xs leading-5 text-[var(--foreground)]`} />
       <div className="mt-3 flex flex-col justify-center gap-3 sm:flex-row">
         {url ? (
           <a
@@ -369,7 +360,7 @@ function MessageActions({
         <button
           type="button"
           onClick={() => void handleCopy()}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--color-surface-2)]"
+          className={`${styles.secondaryAction} inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border px-5 text-sm font-semibold transition-colors`}
         >
           <Copy size={17} weight="bold" />
           {copied ? "Mensagem copiada" : "Copiar mensagem"}
@@ -381,22 +372,112 @@ function MessageActions({
 
 function SubmitButton({
   loading,
+  disabled = false,
+  icon = <PaperPlaneTilt size={18} weight="bold" aria-hidden="true" />,
   children,
   className = "",
 }: {
   loading: boolean;
+  disabled?: boolean;
+  icon?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {
   return (
     <button
       type="submit"
-      disabled={loading}
-      className={`inline-flex min-h-14 min-w-[13rem] items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-[0_20px_44px_rgba(5,150,105,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
+      disabled={loading || disabled}
+      className={`${styles.submit} inline-flex min-h-14 min-w-[13rem] items-center justify-center gap-2 rounded-2xl px-6 py-3 text-sm font-semibold shadow-md transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
     >
-      {loading ? <SpinnerGap size={18} className="animate-spin" weight="bold" /> : <PaperPlaneTilt size={18} weight="bold" />}
+      {loading ? <SpinnerGap size={18} className="animate-spin" weight="bold" aria-hidden="true" /> : icon}
       {children}
     </button>
+  );
+}
+
+function useFormSteps(focusResult: boolean) {
+  const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState<"forward" | "back">("forward");
+  const formRef = useRef<HTMLFormElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const moveFocus = useRef(false);
+  const headingId = useId();
+  useEffect(() => {
+    if ((!moveFocus.current && !focusResult) || !headingRef.current) return;
+    moveFocus.current = false;
+    headingRef.current.focus({ preventScroll: true });
+    const target = formRef.current ?? headingRef.current;
+    const headerOffset = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+    if (target.getBoundingClientRect().top < headerOffset || headingRef.current.getBoundingClientRect().bottom > window.innerHeight) {
+      target.scrollIntoView({ block: "start", behavior: "instant" });
+    }
+  }, [step, focusResult]);
+
+  function navigate(next: number) {
+    moveFocus.current = true;
+    setDirection(next < step ? "back" : "forward");
+    setStep(next);
+  }
+
+  return { step, direction, navigate, headingRef, formRef, headingId };
+}
+
+function StepProgress({ label, description, steps, step, disabled, onBack }: {
+  label: string;
+  description?: string;
+  steps: ReadonlyArray<{ id: string; label: string }>;
+  step: number;
+  disabled: boolean;
+  onBack: (step: number) => void;
+}) {
+  return (
+    <nav className={styles.progress} aria-label={label}>
+      {description && <p className={styles.progressIntro}>{description}</p>}
+      <ol>
+        {steps.map((item, index) => {
+          const complete = index < step;
+          return (
+            <li key={item.id} aria-current={index === step ? "step" : undefined} data-complete={complete || undefined}>
+              {complete ? (
+                <button type="button" disabled={disabled} aria-label={`Voltar à etapa ${item.label}`} onClick={() => onBack(index)}>
+                  <Check size={13} weight="bold" aria-hidden="true" />
+                  {item.label}
+                </button>
+              ) : <span>{item.label}</span>}
+              <div className={styles.track} aria-hidden="true"><i /></div>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
+function StepFooter({ step, onBack, busy, submitting, last, submitLabel }: {
+  step: number;
+  onBack: (step: number) => void;
+  busy: boolean;
+  submitting: boolean;
+  last: boolean;
+  submitLabel: string;
+}) {
+  return (
+    <div className={styles.footer}>
+      {step > 0 && (
+        <button type="button" onClick={() => onBack(step - 1)} disabled={busy} className={`${styles.secondary} inline-flex min-h-11 items-center gap-2 rounded-xl border px-3 text-sm font-semibold disabled:opacity-60`}>
+          <ArrowLeft size={16} weight="bold" aria-hidden="true" />
+          Voltar
+        </button>
+      )}
+      <SubmitButton
+        loading={submitting}
+        disabled={busy}
+        icon={last ? undefined : <ArrowRight size={16} weight="bold" aria-hidden="true" />}
+        className="ml-auto flex-row-reverse px-4"
+      >
+        {submitting ? "Enviando..." : last ? submitLabel : "Continuar"}
+      </SubmitButton>
+    </div>
   );
 }
 
@@ -494,6 +575,16 @@ export function EslQuoteForm({
   const [closedMessage, setClosedMessage] = useState("");
   const postalLookupTimer = useRef<number | null>(null);
 
+  const { step, direction, navigate, headingRef, formRef, headingId } = useFormSteps(status === "success" && Boolean(closedMessage));
+  const currentStep = quoteSteps[step];
+  const isLastStep = step === quoteSteps.length - 1;
+
+  function goToStep(next: number) {
+    navigate(next);
+    setStatus("idle");
+    setError("");
+  }
+
   const kindLabel = values.kind === "fractional" ? "carga fracionada" : "carga fechada";
   const approvalMessage = quote ? quoteApprovalMessage(quote, values) : "";
   const approvalUrl = quote ? whatsappUrl(approvalWhatsappUrl, approvalMessage) : null;
@@ -567,6 +658,11 @@ export function EslQuoteForm({
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (status === "loading" || !event.currentTarget.reportValidity()) return;
+    if (!isLastStep) {
+      goToStep(step + 1);
+      return;
+    }
     setStatus("loading");
     setError("");
     setQuote(null);
@@ -644,12 +740,12 @@ export function EslQuoteForm({
 
   if (status === "success" && closedMessage) {
     return (
-      <div className="rounded-[32px] border border-emerald-500/18 bg-[linear-gradient(180deg,rgba(236,253,245,0.94)_0%,rgba(255,255,255,0.96)_100%)] p-6 text-center shadow-[0_24px_56px_rgba(15,23,42,0.08)] sm:p-8" role="status">
-        <CheckCircle size={38} weight="fill" className="mx-auto text-emerald-600" />
-        <h3 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">Dados prontos para o atendimento.</h3>
+      <div className={`${styles.card} ${styles.result}`} data-kind={values.kind || undefined} role="status">
+        <CheckCircle size={38} weight="fill" className="mx-auto text-[var(--form-accent)]" />
+        <h2 ref={headingRef} tabIndex={-1} className="mt-4 scroll-mt-28 text-2xl font-semibold">Dados prontos para o atendimento.</h2>
         <p className="mt-3 text-sm leading-7 text-[var(--color-muted-raw)]">A carga fechada seguirá pelo time comercial. Envie a mensagem abaixo para continuar.</p>
         <MessageActions message={closedMessage} fallbackLabel="Abrir atendimento" channelUrl={external.whatsappQuoteFull} />
-        <button type="button" onClick={() => setStatus("idle")} className="mt-4 text-sm font-semibold text-[var(--primary)] hover:underline">Editar dados</button>
+        <button type="button" onClick={() => goToStep(0)} className="mt-4 text-sm font-semibold text-[var(--primary)] hover:underline">Editar dados</button>
       </div>
     );
   }
@@ -681,7 +777,7 @@ export function EslQuoteForm({
             </div>
           ) : null}
           <DialogFooter className="mx-0 mb-0 flex-col gap-3 border-0 bg-white/72 px-6 py-5 sm:flex-row sm:justify-between sm:px-8">
-            <button type="button" onClick={() => { setValues(defaultQuoteValues); setQuote(null); setQuoteResultOpen(false); setStatus("idle"); }} className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--color-surface-2)]">Fazer outra cotação</button>
+            <button type="button" onClick={() => { setValues(defaultQuoteValues); setQuote(null); setQuoteResultOpen(false); goToStep(0); }} className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] transition-colors hover:bg-[var(--color-surface-2)]">Fazer outra cotação</button>
             {approvalUrl ? <a href={approvalUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(5,150,105,0.22)] transition-colors hover:bg-emerald-700"><PaperPlaneTilt size={18} weight="bold" />Aprovar cotação</a> : <a href={site.contact} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-[var(--primary)] px-5 text-sm font-semibold text-white">Falar com atendimento</a>}
           </DialogFooter>
         </DialogContent>
@@ -692,99 +788,94 @@ export function EslQuoteForm({
         open={unservedOriginOpen}
         onOpenChange={(open) => {
           setUnservedOriginOpen(open);
-          if (!open) setError("");
+          if (!open) goToStep(1);
         }}
       />
 
-      <form onSubmit={(event) => void onSubmit(event)} className="grid gap-5 lg:grid-cols-12 lg:items-start" noValidate>
-      <div className="flex flex-col gap-5 rounded-[28px] border border-blue-200/80 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(219,234,254,0.82)_100%)] p-5 shadow-[0_18px_42px_rgba(30,64,175,0.08)] sm:p-6 lg:col-span-12 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className={sectionTitleClassName}>Dados da operação</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">Preencha para calcular sua cotação.</h2>
+      <form ref={formRef} onSubmit={(event) => void onSubmit(event)} className={styles.card} data-kind={values.kind || undefined} aria-labelledby={headingId} noValidate>
+        <StepProgress label="Etapas da cotação" description="Escolha a modalidade e siga as quatro etapas." steps={quoteSteps} step={step} disabled={status === "loading"} onBack={goToStep} />
+        <div key={currentStep.id} className={styles.body} data-direction={direction}>
+          <header className={styles.heading}>
+            <p className={sectionTitleClassName}>Etapa {step + 1} de {quoteSteps.length}</p>
+            <h2 id={headingId} ref={headingRef} tabIndex={-1}>{currentStep.title}</h2>
+            <p>{currentStep.description}</p>
+          </header>
+          <fieldset disabled={status === "loading"} aria-labelledby={headingId} className="min-w-0">
+            {currentStep.id === "operation" && (
+              <>
+                <fieldset className="mb-6 grid min-w-0 gap-3 sm:grid-cols-2">
+                  <legend className="sr-only">Modalidade de transporte obrigatória</legend>
+                  {(["fractional", "closed"] as const).map((kind) => {
+                    const fractional = kind === "fractional";
+                    const Icon = fractional ? Package : Truck;
+                    const name = fractional ? "Carga fracionada" : "Carga fechada";
+                    return (
+                      <label key={kind} className={`${styles.quoteKindCard} ${fractional ? styles.green : styles.blue}`}>
+                        <span className={styles.kindIcon}><Icon size={23} weight="duotone" aria-hidden="true" /></span>
+                        <span>
+                          <span className="block text-base font-semibold text-[var(--foreground)]">{name}</span>
+                          <span className="mt-1 block text-xs leading-5 text-[var(--color-muted-raw)]">{fractional ? "Espaço compartilhado. Valor calculado online." : "Veículo dedicado. Proposta pelo comercial."}</span>
+                        </span>
+                        <input
+                          type="radio"
+                          name="quote-kind"
+                          value={kind}
+                          aria-label={name}
+                          required
+                          checked={values.kind === kind}
+                          onChange={() => update("kind", kind)}
+                          className={styles.kindRadio}
+                        />
+                      </label>
+                    );
+                  })}
+                </fieldset>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={formattedInput("customerCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+                  <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={formattedInput("senderCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+                  <Field label="CNPJ do destinatário"><input value={values.recipientCnpj} onChange={formattedInput("recipientCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
+                </div>
+              </>
+            )}
+            {currentStep.id === "route" && (
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Field label="CEP de origem" required><input value={values.originPostalCode} onChange={(event) => { const postalCode = formatPostalCode(event.target.value); update("originPostalCode", postalCode); schedulePostalLookup("origin", postalCode); }} onBlur={(event) => void fillCityFromPostalCode("origin", event.currentTarget.value)} inputMode="numeric" maxLength={9} autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
+                <Field label="Cidade de origem" required><input value={values.originName} onChange={input("originName")} autoComplete="address-level2" placeholder="Ex.: Osasco" className={fieldClassName} /></Field>
+                <Field label="UF de origem" required><input value={values.originStateCode} onChange={input("originStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
+                <Field label="CEP de destino" required><input value={values.destinationPostalCode} onChange={(event) => { const postalCode = formatPostalCode(event.target.value); update("destinationPostalCode", postalCode); schedulePostalLookup("destination", postalCode); }} onBlur={(event) => void fillCityFromPostalCode("destination", event.currentTarget.value)} inputMode="numeric" maxLength={9} autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
+                <Field label="Cidade de destino" required><input value={values.destinationName} onChange={input("destinationName")} autoComplete="address-level2" placeholder="Ex.: Agudos" className={fieldClassName} /></Field>
+                <Field label="UF de destino" required><input value={values.destinationStateCode} onChange={input("destinationStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
+              </div>
+            )}
+            {currentStep.id === "cargo" && (
+              <div className="grid gap-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,0.72fr)_repeat(3,minmax(0,1fr))]">
+                  <Field label="Quantidade" required><input value={values.invoiceVolumes} onChange={(event) => updateQuantity(event.target.value)} type="number" min="1" step="1" inputMode="numeric" placeholder="1" className={fieldClassName} /></Field>
+                  <Field label="Altura (m)" required><input value={values.height} onChange={(event) => updateDimensions("height", event.target.value)} type="number" min="0" step="any" inputMode="decimal" placeholder="1,2" className={fieldClassName} /></Field>
+                  <Field label="Largura (m)" required><input value={values.width} onChange={(event) => updateDimensions("width", event.target.value)} type="number" min="0" step="any" inputMode="decimal" placeholder="0,8" className={fieldClassName} /></Field>
+                  <Field label="Comprimento (m)" required><input value={values.length} onChange={(event) => updateDimensions("length", event.target.value)} type="number" min="0" step="any" inputMode="decimal" placeholder="2,5" className={fieldClassName} /></Field>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <Field label="Volume (m³)" required><input value={values.cubicVolume} readOnly aria-live="polite" placeholder="Calculado automaticamente" className={fieldClassName} /></Field>
+                  <Field label="Peso taxado (kg)"><input value={taxedWeight === null ? "" : String(Number(taxedWeight.toFixed(2)))} readOnly aria-live="polite" placeholder="Calculado automaticamente" className={fieldClassName} /></Field>
+                  <Field label="Peso real (kg)" required><input value={values.realWeight} onChange={input("realWeight")} type="number" min="0" step="any" inputMode="decimal" placeholder="20" className={fieldClassName} /></Field>
+                  <Field label="Valor da NF (R$)" required><input value={values.invoiceValue} onChange={input("invoiceValue")} type="number" min="0" step="any" inputMode="decimal" placeholder="200" className={fieldClassName} /></Field>
+                </div>
+                <Field label="Classificação do produto"><input value={values.productClassificationName} onChange={input("productClassificationName")} placeholder="Ex.: Produtos químicos" className={fieldClassName} /></Field>
+              </div>
+            )}
+            {currentStep.id === "contact" && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Nome" required><input value={values.requesterName} onChange={input("requesterName")} autoComplete="name" placeholder="Seu nome" className={fieldClassName} /></Field>
+                <Field label="Telefone" required><input value={values.requesterPhone} onChange={formattedInput("requesterPhone")} type="tel" inputMode="tel" maxLength={15} autoComplete="tel" placeholder="(00) 00000-0000" className={fieldClassName} /></Field>
+                <Field label="E-mail" required><input value={values.requesterEmail} onChange={input("requesterEmail")} type="email" autoComplete="email" placeholder="seu@email.com" className={fieldClassName} /></Field>
+                <Field label="Observações"><input value={values.comments} onChange={input("comments")} placeholder="Informações adicionais (opcional)" className={fieldClassName} /></Field>
+              </div>
+            )}
+          </fieldset>
+          {status === "error" && <div className="mt-4"><Alert kind="error">{error}</Alert></div>}
         </div>
-        <span className="w-fit rounded-full border border-[var(--border)] bg-white/74 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">Retorno pelo ESL</span>
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:col-span-12" role="radiogroup" aria-label="Tipo de carga">
-        {(["fractional", "closed"] as const).map((kind) => {
-          const selected = values.kind === kind;
-          const Icon = kind === "fractional" ? Package : Truck;
-          const cardToneClassName = kind === "fractional" ? styles.quoteKindCardFractional : styles.quoteKindCardClosed;
-          const iconClassName = selected
-            ? kind === "fractional"
-              ? "bg-emerald-600 text-white shadow-[0_8px_18px_rgba(5,150,105,0.28)]"
-              : "bg-blue-600 text-white shadow-[0_8px_18px_rgba(37,99,235,0.28)]"
-            : kind === "fractional"
-              ? "bg-emerald-50 text-emerald-700"
-              : "bg-blue-50 text-blue-700";
-          return (
-            <button key={kind} type="button" onClick={() => update("kind", kind)} aria-pressed={selected} className={`relative rounded-2xl border p-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 ${styles.quoteKindCard} ${cardToneClassName} ${selected ? styles.quoteKindCardSelected : "border-[var(--border)] bg-white/72 hover:bg-white"}`}>
-              <span className="flex items-start gap-3">
-                <span className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-[background-color,color,box-shadow] duration-300 ${iconClassName}`}><Icon size={21} weight="duotone" /></span>
-                <span>
-                  <span className="block text-sm font-semibold text-[var(--foreground)]">{kind === "fractional" ? "Carga fracionada" : "Carga fechada"}</span>
-                  <span className="mt-1 block text-xs leading-5 text-[var(--color-muted-raw)]">{kind === "fractional" ? "Para volumes que seguem junto de outras cargas; o valor é calculado nesta página." : "Para um veículo dedicado à sua operação; os dados seguem para atendimento comercial."}</span>
-                </span>
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      <Fieldset title="Empresas envolvidas" description="Informe o CNPJ da empresa responsável pela operação. A filial Rodogarcia é identificada automaticamente pela cidade de origem." tone={values.kind} transitionIndex={0} className="lg:col-span-12">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={formattedInput("customerCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={formattedInput("senderCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do destinatário"><input value={values.recipientCnpj} onChange={formattedInput("recipientCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-        </div>
-      </Fieldset>
-
-      <Fieldset title="Origem e destino" tone={values.kind} transitionIndex={1} className="lg:col-span-12">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="CEP de origem" required><input value={values.originPostalCode} onChange={(event) => { const postalCode = formatPostalCode(event.target.value); update("originPostalCode", postalCode); schedulePostalLookup("origin", postalCode); }} onBlur={(event) => void fillCityFromPostalCode("origin", event.currentTarget.value)} inputMode="numeric" maxLength={9} autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
-          <Field label="Cidade de origem" required><input value={values.originName} onChange={input("originName")} autoComplete="address-level2" placeholder="Ex.: Osasco" className={fieldClassName} /></Field>
-          <Field label="UF de origem" required><input value={values.originStateCode} onChange={input("originStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
-          <Field label="CEP de destino" required><input value={values.destinationPostalCode} onChange={(event) => { const postalCode = formatPostalCode(event.target.value); update("destinationPostalCode", postalCode); schedulePostalLookup("destination", postalCode); }} onBlur={(event) => void fillCityFromPostalCode("destination", event.currentTarget.value)} inputMode="numeric" maxLength={9} autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
-          <Field label="Cidade de destino" required><input value={values.destinationName} onChange={input("destinationName")} autoComplete="address-level2" placeholder="Ex.: Agudos" className={fieldClassName} /></Field>
-          <Field label="UF de destino" required><input value={values.destinationStateCode} onChange={input("destinationStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
-        </div>
-      </Fieldset>
-
-      <Fieldset title="Dados da carga" tone={values.kind} transitionIndex={2} className="lg:col-span-7 lg:self-stretch">
-        <div className="grid gap-4 [&>label]:min-w-0 [&>label>span]:whitespace-nowrap">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,0.72fr)_repeat(3,minmax(0,1fr))]">
-            <Field label="Quantidade" required><input value={values.invoiceVolumes} onChange={(event) => updateQuantity(event.target.value)} type="number" min="1" step="1" inputMode="numeric" placeholder="1" className={fieldClassName} /></Field>
-            <Field label="Altura (m)" required><input value={values.height} onChange={(event) => updateDimensions("height", event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="1,2" className={fieldClassName} /></Field>
-            <Field label="Largura (m)" required><input value={values.width} onChange={(event) => updateDimensions("width", event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="0,8" className={fieldClassName} /></Field>
-            <Field label="Comprimento (m)" required><input value={values.length} onChange={(event) => updateDimensions("length", event.target.value)} type="number" min="0" step="0.01" inputMode="decimal" placeholder="2,5" className={fieldClassName} /></Field>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Field label="Volume (m³)" required><input value={values.cubicVolume} readOnly aria-live="polite" placeholder="Calculado automaticamente" className={`${fieldClassName} cursor-default bg-slate-100/90 text-slate-600`} /></Field>
-            <Field label="Peso taxado (kg)"><input value={taxedWeight === null ? "" : String(Number(taxedWeight.toFixed(2)))} readOnly aria-live="polite" placeholder="Calculado automaticamente" className={`${fieldClassName} cursor-default bg-slate-100/90 text-slate-600`} /></Field>
-            <Field label="Peso real (kg)" required><input value={values.realWeight} onChange={input("realWeight")} type="number" min="0" step="0.01" inputMode="decimal" placeholder="20" className={fieldClassName} /></Field>
-            <Field label="Valor da NF (R$)" required><input value={values.invoiceValue} onChange={input("invoiceValue")} type="number" min="0" step="0.01" inputMode="decimal" placeholder="200" className={fieldClassName} /></Field>
-          </div>
-          <Field label="Classificação do produto"><input value={values.productClassificationName} onChange={input("productClassificationName")} placeholder="Ex.: Produtos químicos" className={fieldClassName} /></Field>
-        </div>
-      </Fieldset>
-
-      <Fieldset title="Solicitante" tone={values.kind} transitionIndex={3} className="lg:col-span-5 lg:self-stretch">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Nome" required><input value={values.requesterName} onChange={input("requesterName")} autoComplete="name" placeholder="Seu nome" className={fieldClassName} /></Field>
-          <Field label="Telefone" required><input value={values.requesterPhone} onChange={formattedInput("requesterPhone")} type="tel" inputMode="tel" maxLength={15} autoComplete="tel" placeholder="(00) 00000-0000" className={fieldClassName} /></Field>
-          <Field label="E-mail" required><input value={values.requesterEmail} onChange={input("requesterEmail")} type="email" autoComplete="email" placeholder="seu@email.com" className={fieldClassName} /></Field>
-          <Field label="Observações"><input value={values.comments} onChange={input("comments")} placeholder="Informações adicionais (opcional)" className={fieldClassName} /></Field>
-        </div>
-        <div className="flex justify-start border-t border-slate-300/80 pt-5 sm:justify-end">
-          <SubmitButton loading={status === "loading"}>{status === "loading" ? "Enviando..." : values.kind === "fractional" ? "Calcular cotação" : `Preparar ${kindLabel}`}</SubmitButton>
-        </div>
-      </Fieldset>
-
-      {status === "error" ? (
-        <div className="space-y-3 lg:col-span-12">
-          <Alert kind="error">{error}</Alert>
-        </div>
-      ) : null}
+        <StepFooter step={step} onBack={goToStep} busy={status === "loading"} submitting={status === "loading"} last={isLastStep} submitLabel={values.kind === "fractional" ? "Calcular cotação" : `Preparar ${kindLabel}`} />
       </form>
     </>
   );
@@ -793,6 +884,7 @@ export function EslQuoteForm({
 export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUnservedOriginContent }) {
   const { apiRequest } = useApiRequest();
   const [values, setValues] = useState<CollectionValues>(defaultCollectionValues);
+
   const [status, setStatus] = useState<RequestStatus>("idle");
   const [validationStatus, setValidationStatus] = useState<RequestStatus>("idle");
   const [error, setError] = useState("");
@@ -803,6 +895,12 @@ export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUns
   const [companyLookupMessage, setCompanyLookupMessage] = useState("");
   const [unservedOriginOpen, setUnservedOriginOpen] = useState(false);
   const companyLookupTimer = useRef<number | null>(null);
+  const companyLookup = useRef<{ cnpj: string; controller: AbortController } | null>(null);
+  const postalLookup = useRef<AbortController | null>(null);
+  const { step, direction, navigate, headingRef, formRef, headingId } = useFormSteps(status === "success");
+  const currentStep = collectionSteps[step];
+  const isLastStep = step === collectionSteps.length - 1;
+  const isBusy = status === "loading" || validationStatus === "loading";
 
   const validationFingerprint = useMemo(
     () => [values.customerCnpj, values.pickupLocationCnpj, values.senderCnpj, values.recipientCnpj, values.originName, values.originStateCode, values.invoiceKey, values.invoiceNumber, values.invoiceSeries].join("|"),
@@ -812,6 +910,19 @@ export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUns
   const isInvoiceCurrent = Boolean(
     invoiceValidationToken && validationFingerprint === validatedFingerprint
   );
+
+  useEffect(() => () => {
+    if (companyLookupTimer.current !== null) window.clearTimeout(companyLookupTimer.current);
+    companyLookup.current?.controller.abort();
+    postalLookup.current?.abort();
+  }, []);
+
+  function goToStep(next: number) {
+    navigate(next);
+    setStatus("idle");
+    setValidationStatus("idle");
+    setError("");
+  }
 
   function update<K extends keyof CollectionValues>(key: K, value: CollectionValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -824,11 +935,12 @@ export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUns
   function updateDeliveryAddress<K extends keyof CollectionValues>(key: K, value: CollectionValues[K]) {
     setValues((current) => {
       const next = { ...current, [key]: value };
-      if (key === "deliveryCity") next.originName = value as string;
-      if (key === "deliveryStateCode") next.originStateCode = value as string;
+      if (key === "deliveryCity" && value.trim()) next.originName = value;
+      if (key === "deliveryStateCode" && /^[a-z]{2}$/i.test(value)) next.originStateCode = value;
       return next;
     });
     if (key === "deliveryCity" || key === "deliveryStateCode") {
+      postalLookup.current?.abort();
       setInvoiceValidationToken("");
       setValidatedFingerprint("");
     }
@@ -836,18 +948,22 @@ export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUns
 
   async function lookupPickupLocationAddress(rawCnpj: string) {
     const cnpj = digits(rawCnpj);
-    if (cnpj.length !== 14) return;
+    if (cnpj.length !== 14 || companyLookup.current?.cnpj === cnpj) return;
+    if (companyLookupTimer.current !== null) window.clearTimeout(companyLookupTimer.current);
+    companyLookupTimer.current = null;
+    const controller = new AbortController();
+    companyLookup.current = { cnpj, controller };
     setCompanyLookupStatus("loading");
     setCompanyLookupMessage("");
     try {
-      const response = await fetch(api.public.company(cnpj));
+      const response = await fetch(api.public.company(cnpj), { signal: controller.signal });
       const data: unknown = await response.json().catch(() => null);
+      if (controller.signal.aborted) return;
       if (!response.ok || !data || typeof data !== "object") {
         throw new Error("Não foi possível confirmar o endereço pelo CNPJ.");
       }
       const address = data as CompanyAddressResponse;
-      setValues((current) => ({
-        ...current,
+      const addressValues = {
         deliveryPostalCode: address.postalCode,
         deliveryStreet: address.street,
         deliveryNumber: address.number,
@@ -857,36 +973,51 @@ export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUns
         deliveryStateCode: address.stateCode,
         originName: address.city,
         originStateCode: address.stateCode,
-      }));
+      };
+      setValues((current) => {
+        const next = { ...current };
+        for (const key of Object.keys(addressValues) as Array<keyof typeof addressValues>) {
+          if (current[key] === values[key] && addressValues[key]) next[key] = addressValues[key];
+        }
+        return next;
+      });
       setInvoiceValidationToken("");
       setValidatedFingerprint("");
       setCompanyLookupStatus("success");
       setCompanyLookupMessage("Endereço confirmado pelo CNPJ. Confira os dados antes de solicitar.");
     } catch {
+      if (controller.signal.aborted) return;
       setCompanyLookupStatus("error");
       setCompanyLookupMessage("Não foi possível confirmar pelo CNPJ. Preencha o endereço manualmente.");
     }
   }
 
   function schedulePickupLocationLookup(rawCnpj: string) {
-    if (companyLookupTimer.current) window.clearTimeout(companyLookupTimer.current);
+    if (companyLookupTimer.current !== null) window.clearTimeout(companyLookupTimer.current);
+    companyLookupTimer.current = null;
+    companyLookup.current?.controller.abort();
+    companyLookup.current = null;
+    setCompanyLookupMessage("");
     if (digits(rawCnpj).length !== 14) {
       setCompanyLookupStatus("idle");
-      setCompanyLookupMessage("");
       return;
     }
+    setCompanyLookupStatus("loading");
     companyLookupTimer.current = window.setTimeout(() => {
       void lookupPickupLocationAddress(rawCnpj);
     }, 350);
   }
 
   async function fillDeliveryCityFromPostalCode(rawPostalCode: string) {
+    postalLookup.current?.abort();
     const postalCode = digits(rawPostalCode);
     if (postalCode.length !== 8) return;
+    const controller = new AbortController();
+    postalLookup.current = controller;
     try {
-      const response = await fetch(api.public.postalCode(postalCode));
+      const response = await fetch(api.public.postalCode(postalCode), { signal: controller.signal });
       const data: unknown = await response.json().catch(() => null);
-      if (!response.ok || !data || typeof data !== "object") return;
+      if (controller.signal.aborted || !response.ok || !data || typeof data !== "object") return;
       const address = data as { city?: unknown; stateCode?: unknown };
       const city = typeof address.city === "string" ? address.city : "";
       const stateCode = typeof address.stateCode === "string" ? address.stateCode : "";
@@ -918,6 +1049,7 @@ export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUns
   }
 
   async function validateInvoice() {
+    if (isBusy) return;
     setValidationStatus("loading");
     setError("");
     setInvoiceValidationToken("");
@@ -944,6 +1076,14 @@ export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUns
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (isBusy || !event.currentTarget.reportValidity()) return;
+    if (!isLastStep) {
+      goToStep(step + 1);
+      return;
+    }
+
+    if (companyLookupStatus === "loading") schedulePickupLocationLookup("");
+    postalLookup.current?.abort();
     setStatus("loading");
     setError("");
     setValidationStatus("idle");
@@ -1010,24 +1150,36 @@ export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUns
 
   if (status === "success" && collection) {
     return (
-      <div className="rounded-[32px] border border-emerald-500/18 bg-[linear-gradient(180deg,rgba(236,253,245,0.94)_0%,rgba(255,255,255,0.96)_100%)] p-6 text-center shadow-[0_24px_56px_rgba(15,23,42,0.08)] sm:p-8" role="status">
-        <CheckCircle size={38} weight="fill" className="mx-auto text-emerald-600" />
-        <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">Coleta registrada.</h2>
-        <p className="mt-3 text-sm leading-7 text-[var(--color-muted-raw)]">Número da coleta</p>
+      <div className={`${styles.card} ${styles.result}`} role="status">
+        <CheckCircle size={38} weight="fill" className="mx-auto text-[var(--form-accent)]" aria-hidden="true" />
+        <h2 ref={headingRef} tabIndex={-1} className="mt-4 scroll-mt-28 text-2xl font-semibold">Coleta registrada.</h2>
+        <p className="mt-3 text-sm leading-7">Número da coleta</p>
         <p className="mt-1 text-3xl font-bold tracking-[-0.05em] text-[var(--foreground)]">{collection.sequenceCode || collection.id}</p>
-        <button type="button" onClick={() => { setValues(defaultCollectionValues); setInvoiceValidationToken(""); setValidatedFingerprint(""); setStatus("idle"); }} className="mt-6 inline-flex min-h-12 items-center justify-center rounded-2xl border border-[var(--border)] bg-white px-5 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--color-surface-2)]">Solicitar outra coleta</button>
+        <button
+          type="button"
+          onClick={() => {
+            setValues(defaultCollectionValues);
+            setInvoiceValidationToken("");
+            setValidatedFingerprint("");
+            schedulePickupLocationLookup("");
+            goToStep(0);
+          }}
+          className={`${styles.secondary} mt-6 inline-flex min-h-11 items-center justify-center rounded-xl border px-5 text-sm font-semibold transition-colors`}
+        >
+          Solicitar outra coleta
+        </button>
       </div>
     );
   }
 
   if (status === "success" && whatsappMessage) {
     return (
-      <div className="rounded-[32px] border border-amber-500/20 bg-[linear-gradient(180deg,rgba(255,251,235,0.94)_0%,rgba(255,255,255,0.96)_100%)] p-6 text-center shadow-[0_24px_56px_rgba(15,23,42,0.08)] sm:p-8" role="status">
-        <WarningCircle size={38} weight="fill" className="mx-auto text-amber-600" />
-        <h2 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">Precisamos concluir com o atendimento.</h2>
-        <p className="mt-3 text-sm leading-7 text-[var(--color-muted-raw)]">O CNPJ do cliente não foi reconhecido para registrar a coleta automaticamente.</p>
+      <div className={`${styles.card} ${styles.result}`} role="status">
+        <WarningCircle size={38} weight="fill" className="mx-auto text-amber-800" aria-hidden="true" />
+        <h2 ref={headingRef} tabIndex={-1} className="mt-4 scroll-mt-28 text-2xl font-semibold">Precisamos concluir com o atendimento.</h2>
+        <p className="mt-3 text-sm leading-7">O CNPJ do cliente não foi reconhecido para registrar a coleta automaticamente.</p>
         <MessageActions message={whatsappMessage} fallbackLabel="Abrir atendimento" channelUrl={external.whatsappCommercial} />
-        <button type="button" onClick={() => setStatus("idle")} className="mt-4 text-sm font-semibold text-[var(--primary)] hover:underline">Editar dados</button>
+        <button type="button" onClick={() => goToStep(0)} className="mt-4 text-sm font-semibold text-[var(--form-accent)] hover:underline">Editar dados</button>
       </div>
     );
   }
@@ -1039,78 +1191,145 @@ export function EslCollectionForm({ unservedOrigin }: { unservedOrigin: QuoteUns
         open={unservedOriginOpen}
         onOpenChange={(open) => {
           setUnservedOriginOpen(open);
-          if (!open) setError("");
+          if (!open) goToStep(0);
         }}
       />
-      <form onSubmit={(event) => void onSubmit(event)} className="grid gap-5 lg:grid-cols-12 lg:items-start" noValidate>
-      <div className="flex flex-col gap-2 rounded-[28px] border border-blue-200/80 bg-[linear-gradient(135deg,rgba(239,246,255,0.98)_0%,rgba(219,234,254,0.82)_100%)] p-5 shadow-[0_18px_42px_rgba(30,64,175,0.08)] sm:flex-row sm:items-end sm:justify-between sm:p-6 lg:col-span-12">
-        <div>
-          <p className={sectionTitleClassName}>Agendamento de coleta</p>
-          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-[var(--foreground)]">Registre a coleta com os dados da NF.</h2>
-        </div>
-        <span className="w-fit rounded-full border border-[var(--border)] bg-white/74 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-muted-raw)]">NF opcional</span>
-      </div>
+      <form
+        ref={formRef}
+        onSubmit={(event) => void onSubmit(event)}
+        className={styles.card}
+        aria-labelledby={headingId}
+        noValidate
+      >
+        <StepProgress label="Etapas da coleta" steps={collectionSteps} step={step} disabled={isBusy} onBack={goToStep} />
 
-      <Fieldset title="Cadastros da operação" description="O cliente precisa estar cadastrado no ESL. O mesmo CNPJ é usado como cliente e pagador; a filial é identificada pela cidade de origem. Para validar uma NF, informe também o CNPJ do remetente ou do destinatário que consta nela." className="lg:col-span-12">
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <Field label="CNPJ do cliente e pagador" required><input value={values.customerCnpj} onChange={formattedInput("customerCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do local de coleta" required><input value={values.pickupLocationCnpj} onChange={(event) => { const cnpj = formatCnpj(event.target.value); update("pickupLocationCnpj", cnpj); schedulePickupLocationLookup(cnpj); }} onBlur={(event) => void lookupPickupLocationAddress(event.currentTarget.value)} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="00.000.000/0000-00" className={fieldClassName} /></Field>
-          <Field label="CNPJ do remetente"><input value={values.senderCnpj} onChange={formattedInput("senderCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="Opcional" className={fieldClassName} /></Field>
-          <Field label="CNPJ do destinatário"><input value={values.recipientCnpj} onChange={formattedInput("recipientCnpj")} inputMode="numeric" maxLength={18} autoComplete="off" placeholder="Opcional" className={fieldClassName} /></Field>
-          <Field label="Cidade de origem" required><input value={values.originName} onChange={input("originName")} autoComplete="address-level2" placeholder="Ex.: Osasco" className={fieldClassName} /></Field>
-          <Field label="UF de origem" required><input value={values.originStateCode} onChange={input("originStateCode")} maxLength={2} autoComplete="address-level1" placeholder="SP" className={fieldClassName} /></Field>
-        </div>
-      </Fieldset>
+        <div key={currentStep.id} className={styles.body} data-direction={direction}>
+          <header className={styles.heading}>
+            <p className={sectionTitleClassName}>Etapa {step + 1} de {collectionSteps.length}</p>
+            <h2 id={headingId} ref={headingRef} tabIndex={-1}>{currentStep.title}</h2>
+            <p>{currentStep.description}</p>
+          </header>
+          <fieldset disabled={isBusy} aria-labelledby={headingId} className="min-w-0">
+            {currentStep.id === "operation" && (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <Field label="CNPJ do cliente e pagador" required>
+                  <input {...collectionCnpjInput} required value={values.customerCnpj} onChange={formattedInput("customerCnpj")} placeholder="00.000.000/0000-00" />
+                </Field>
+                <Field label="CNPJ do local de coleta" required>
+                  <input
+                    {...collectionCnpjInput}
+                    required
+                    value={values.pickupLocationCnpj}
+                    onChange={(event) => {
+                      const cnpj = formatCnpj(event.target.value);
+                      update("pickupLocationCnpj", cnpj);
+                      schedulePickupLocationLookup(cnpj);
+                    }}
+                    onBlur={(event) => void lookupPickupLocationAddress(event.currentTarget.value)}
+                    placeholder="00.000.000/0000-00"
+                  />
+                </Field>
+                <Field label="CNPJ do remetente">
+                  <input {...collectionCnpjInput} value={values.senderCnpj} onChange={formattedInput("senderCnpj")} placeholder="Opcional" />
+                </Field>
+                <Field label="CNPJ do destinatário">
+                  <input {...collectionCnpjInput} value={values.recipientCnpj} onChange={formattedInput("recipientCnpj")} placeholder="Opcional" />
+                </Field>
+                <Field label="Cidade de origem" required>
+                  <input required value={values.originName} onChange={input("originName")} autoComplete="address-level2" placeholder="Ex.: Osasco" className={fieldClassName} />
+                </Field>
+                <Field label="UF de origem" required>
+                  <input required value={values.originStateCode} onChange={input("originStateCode")} maxLength={2} pattern="[A-Za-z]{2}" autoComplete="address-level1" placeholder="SP" className={fieldClassName} />
+                </Field>
+              </div>
+            )}
 
-      <Fieldset title="Endereço de entrega" description="O endereço é confirmado automaticamente quando o CNPJ do local de coleta for localizado. Se não for, preencha ou ajuste os campos abaixo antes de solicitar." className="lg:col-span-12">
-        <div className="grid gap-4 sm:grid-cols-6">
-          <Field label="CEP de entrega" className="sm:col-span-1"><input value={values.deliveryPostalCode} onChange={(event) => { const postalCode = formatPostalCode(event.target.value); updateDeliveryAddress("deliveryPostalCode", postalCode); void fillDeliveryCityFromPostalCode(postalCode); }} onBlur={(event) => void fillDeliveryCityFromPostalCode(event.currentTarget.value)} inputMode="numeric" maxLength={9} autoComplete="postal-code" placeholder="00000-000" className={fieldClassName} /></Field>
-          <Field label="Logradouro" className="sm:col-span-3"><input value={values.deliveryStreet} onChange={(event) => updateDeliveryAddress("deliveryStreet", event.target.value)} autoComplete="address-line1" placeholder="Rua, avenida ou estrada" className={fieldClassName} /></Field>
-          <Field label="Número" className="sm:col-span-1"><input value={values.deliveryNumber} onChange={(event) => updateDeliveryAddress("deliveryNumber", event.target.value)} autoComplete="address-line2" placeholder="Número" className={fieldClassName} /></Field>
-          <Field label="Complemento" className="sm:col-span-1"><input value={values.deliveryComplement} onChange={(event) => updateDeliveryAddress("deliveryComplement", event.target.value)} autoComplete="address-line2" placeholder="Opcional" className={fieldClassName} /></Field>
-          <Field label="Bairro" className="sm:col-span-2"><input value={values.deliveryNeighborhood} onChange={(event) => updateDeliveryAddress("deliveryNeighborhood", event.target.value)} autoComplete="address-level3" placeholder="Bairro" className={fieldClassName} /></Field>
-          <Field label="Cidade de entrega" className="sm:col-span-3"><input value={values.deliveryCity} onChange={(event) => updateDeliveryAddress("deliveryCity", event.target.value)} autoComplete="address-level2" placeholder="Cidade" className={fieldClassName} /></Field>
-          <Field label="UF de entrega" className="sm:col-span-1"><input value={values.deliveryStateCode} onChange={(event) => updateDeliveryAddress("deliveryStateCode", event.target.value)} maxLength={2} autoComplete="address-level1" placeholder="UF" className={fieldClassName} /></Field>
-        </div>
-        {companyLookupStatus === "loading" ? <p className="mt-4 text-sm text-[var(--color-muted-raw)]">Confirmando o endereço do CNPJ...</p> : null}
-        {companyLookupMessage ? <p className={`mt-4 text-sm ${companyLookupStatus === "success" ? "text-emerald-700" : "text-amber-700"}`}>{companyLookupMessage}</p> : null}
-      </Fieldset>
+            {currentStep.id === "address" && (
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
+                <Field label="CEP de entrega" className="col-span-2 md:col-span-1">
+                  <input
+                    value={values.deliveryPostalCode}
+                    onChange={(event) => {
+                      const postalCode = formatPostalCode(event.target.value);
+                      updateDeliveryAddress("deliveryPostalCode", postalCode);
+                      void fillDeliveryCityFromPostalCode(postalCode);
+                    }}
+                    inputMode="numeric"
+                    maxLength={9}
+                    autoComplete="postal-code"
+                    placeholder="00000-000"
+                    className={fieldClassName}
+                  />
+                </Field>
+                <Field label="Logradouro" className="col-span-2 md:col-span-3">
+                  <input value={values.deliveryStreet} onChange={(event) => updateDeliveryAddress("deliveryStreet", event.target.value)} autoComplete="address-line1" placeholder="Rua, avenida ou estrada" className={fieldClassName} />
+                </Field>
+                <Field label="Número">
+                  <input value={values.deliveryNumber} onChange={(event) => updateDeliveryAddress("deliveryNumber", event.target.value)} autoComplete="address-line2" placeholder="Número" className={fieldClassName} />
+                </Field>
+                <Field label="Complemento">
+                  <input value={values.deliveryComplement} onChange={(event) => updateDeliveryAddress("deliveryComplement", event.target.value)} autoComplete="address-line2" placeholder="Opcional" className={fieldClassName} />
+                </Field>
+                <Field label="Bairro" className="col-span-2">
+                  <input value={values.deliveryNeighborhood} onChange={(event) => updateDeliveryAddress("deliveryNeighborhood", event.target.value)} autoComplete="address-level3" placeholder="Bairro" className={fieldClassName} />
+                </Field>
+                <Field label="Cidade de entrega" className="md:col-span-3">
+                  <input value={values.deliveryCity} onChange={(event) => updateDeliveryAddress("deliveryCity", event.target.value)} autoComplete="address-level2" placeholder="Cidade" className={fieldClassName} />
+                </Field>
+                <Field label="UF de entrega">
+                  <input value={values.deliveryStateCode} onChange={(event) => updateDeliveryAddress("deliveryStateCode", event.target.value)} maxLength={2} pattern="[A-Za-z]{2}" autoComplete="address-level1" placeholder="UF" className={fieldClassName} />
+                </Field>
+              </div>
+            )}
 
-      <Fieldset title="Programação da coleta" className="lg:col-span-5 lg:self-stretch">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Data" required><input value={values.serviceDate} onChange={input("serviceDate")} type="date" className={fieldClassName} /></Field>
-          <Field label="Horário inicial" required><input value={values.serviceStartHour} onChange={input("serviceStartHour")} type="time" className={fieldClassName} /></Field>
-          <Field label="Horário final" required><input value={values.serviceEndHour} onChange={input("serviceEndHour")} type="time" className={fieldClassName} /></Field>
-        </div>
-        <div className="border-t border-slate-300/80 pt-5">
-          <p className={sectionTitleClassName}>Referência e observações</p>
-          <div className="mt-4 grid gap-4">
-            <Field label="Referência interna"><input value={values.referenceNumber} onChange={input("referenceNumber")} placeholder="Opcional" className={fieldClassName} /></Field>
-            <Field label="Observações"><input value={values.comments} onChange={input("comments")} placeholder="Opcional" className={fieldClassName} /></Field>
-          </div>
-        </div>
-      </Fieldset>
+            {currentStep.id === "schedule" && (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-6">
+                <Field label="Data" required className="col-span-2">
+                  <input required value={values.serviceDate} onChange={input("serviceDate")} type="date" className={fieldClassName} />
+                </Field>
+                <Field label="Horário inicial" required className="sm:col-span-2">
+                  <input required value={values.serviceStartHour} onChange={input("serviceStartHour")} type="time" className={fieldClassName} />
+                </Field>
+                <Field label="Horário final" required className="sm:col-span-2">
+                  <input required value={values.serviceEndHour} onChange={input("serviceEndHour")} type="time" className={fieldClassName} />
+                </Field>
+                <Field label="Referência interna" className="col-span-2 sm:col-span-3">
+                  <input value={values.referenceNumber} onChange={input("referenceNumber")} placeholder="Opcional" className={fieldClassName} />
+                </Field>
+                <Field label="Observações" className="col-span-2 sm:col-span-3">
+                  <input value={values.comments} onChange={input("comments")} placeholder="Opcional" className={fieldClassName} />
+                </Field>
+              </div>
+            )}
 
-      <Fieldset title="Nota fiscal" description="A consulta é opcional. Para confirmar uma NF, informe a chave ou o número e o CNPJ do remetente ou destinatário correspondente. O agendamento continua disponível sem NF." className="lg:col-span-7 lg:self-stretch">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Chave da NF"><input value={values.invoiceKey} onChange={input("invoiceKey")} inputMode="numeric" autoComplete="off" placeholder="44 dígitos" className={fieldClassName} /></Field>
-          <Field label="Número da NF"><input value={values.invoiceNumber} onChange={input("invoiceNumber")} autoComplete="off" placeholder="Ex.: 12345" className={fieldClassName} /></Field>
-          <Field label="Série"><input value={values.invoiceSeries} onChange={input("invoiceSeries")} autoComplete="off" placeholder="Ex.: 1" className={fieldClassName} /></Field>
+            {currentStep.id === "invoice" && (
+              <div className="space-y-4">
+                <dl className={styles.summary}>
+                  <div><dt>Origem</dt><dd>{values.originName} / {values.originStateCode.toUpperCase()}</dd></div>
+                  <div><dt>Retirada solicitada</dt><dd>{values.serviceDate.split("-").reverse().join("/")} · {values.serviceStartHour} às {values.serviceEndHour}</dd></div>
+                </dl>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Field label="Chave da NF"><input value={values.invoiceKey} onChange={input("invoiceKey")} inputMode="numeric" autoComplete="off" placeholder="44 dígitos" className={fieldClassName} /></Field>
+                  <Field label="Número da NF"><input value={values.invoiceNumber} onChange={input("invoiceNumber")} autoComplete="off" placeholder="Ex.: 12345" className={fieldClassName} /></Field>
+                  <Field label="Série"><input value={values.invoiceSeries} onChange={input("invoiceSeries")} autoComplete="off" placeholder="Ex.: 1" className={fieldClassName} /></Field>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button type="button" onClick={() => void validateInvoice()} disabled={isBusy} className={`${styles.secondary} inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition-colors disabled:opacity-60`}>
+                    {validationStatus === "loading" ? <SpinnerGap size={17} className="animate-spin" weight="bold" aria-hidden="true" /> : <ClipboardText size={17} weight="bold" aria-hidden="true" />}
+                    {validationStatus === "loading" ? "Consultando..." : "Consultar NF"}
+                  </button>
+                  {isInvoiceCurrent && <span role="status" className="text-sm font-semibold text-emerald-800">NF confirmada</span>}
+                </div>
+              </div>
+            )}
+
+            {step < 2 && companyLookupStatus === "loading" && <p role="status" className="mt-4 text-sm">Buscando o endereço pelo CNPJ...</p>}
+            {step < 2 && companyLookupMessage && <p role="status" className={`mt-4 text-sm ${companyLookupStatus === "success" ? "text-emerald-800" : "text-amber-800"}`}>{companyLookupMessage}</p>}
+            {(status === "error" || validationStatus === "error") && <div className="mt-4"><Alert kind="error">{error}</Alert></div>}
+          </fieldset>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <button type="button" onClick={() => void validateInvoice()} disabled={validationStatus === "loading"} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[var(--primary)] px-5 text-sm font-semibold text-white shadow-[0_12px_26px_rgba(29,78,216,0.2)] transition-colors hover:bg-[var(--color-primary-strong)] disabled:cursor-not-allowed disabled:opacity-60">
-            {validationStatus === "loading" ? <SpinnerGap size={17} className="animate-spin" weight="bold" /> : <ClipboardText size={17} weight="bold" />}
-            {validationStatus === "loading" ? "Consultando..." : "Consultar NF"}
-          </button>
-          {isInvoiceCurrent ? <span className="text-sm font-semibold text-emerald-700">NF confirmada</span> : <span className="text-xs text-[var(--color-muted-raw)]">Você pode solicitar a coleta sem consultar a NF.</span>}
-        </div>
-        <div className="grid gap-4 border-t border-slate-300/80 pt-5">
-          {status === "error" || validationStatus === "error" ? <Alert kind="error">{error}</Alert> : null}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-            <SubmitButton loading={status === "loading"} className="shrink-0">{status === "loading" ? "Solicitando..." : "Solicitar coleta"}</SubmitButton>
-          </div>
-        </div>
-      </Fieldset>
+
+        <StepFooter step={step} onBack={goToStep} busy={isBusy} submitting={status === "loading"} last={isLastStep} submitLabel="Solicitar coleta" />
       </form>
     </>
   );

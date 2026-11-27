@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PhoneCall } from "@phosphor-icons/react/dist/ssr";
+import { QuoteRequestLink } from "@/components/forms/QuoteRequestLink";
 import { EslQuoteForm } from "@/components/forms/EslTransportForms";
 import { OperationGuidanceAccordion } from "@/components/internal/OperationGuidanceAccordion";
 import { QuoteOtherChannelsSection } from "@/components/internal/QuoteOtherChannelsSection";
@@ -99,13 +100,16 @@ export default async function CotacaoPage() {
           <PageContainer>
             <div className="mx-auto max-w-[920px] py-10 text-center sm:py-12 lg:py-16">
               <h1 id="cotacao-hero-title" className="mx-auto max-w-[16ch] text-[clamp(3rem,8vw,6rem)] font-bold leading-[0.9] tracking-[-0.05em] sm:max-w-[18ch] sm:tracking-[-0.07em]">
-                <span className="block bg-[linear-gradient(180deg,#a5f3fc_0%,#dbeafe_100%)] bg-clip-text text-transparent">Cotação de transporte</span>
-                <span className="mt-1 block text-white">para a sua operação.</span>
+                <span className="block bg-[linear-gradient(180deg,#a5f3fc_0%,#dbeafe_100%)] bg-clip-text text-transparent">Cotação de frete</span>
               </h1>
-              <p className="mx-auto mt-5 max-w-[44rem] text-sm leading-7 text-white/68 sm:text-base">Para carga fracionada, o valor é calculado online. Para carga fechada, organizamos os dados para o atendimento comercial.</p>
+              <p className="mx-auto mt-5 max-w-[44rem] text-sm leading-7 text-white/68 sm:text-base">Calcule a carga fracionada online ou peça uma proposta para carga fechada.</p>
               <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-row sm:items-center sm:justify-center">
                 {quotePage.hero.buttons.slice(0, 2).map((button, index) => (
-                  <ActionLink key={`${button.label}-${button.url}`} action={{ label: button.label, href: button.url, variant: index === 1 ? "secondary" : "primary" }} tone="dark" className="w-full min-w-0 sm:w-auto" />
+                  button.url === "#formulario-cotacao" ? (
+                    <QuoteRequestLink key={button.url} button={button} />
+                  ) : (
+                    <ActionLink key={`${button.label}-${button.url}`} action={{ label: button.label, href: button.url, variant: index === 1 ? "secondary" : "primary" }} tone="dark" className="w-full min-w-0 sm:w-auto" />
+                  )
                 ))}
               </div>
             </div>
@@ -113,10 +117,9 @@ export default async function CotacaoPage() {
         </section>
       </div>
 
-      <PageSection className="relative bg-[linear-gradient(180deg,#f8fafc_0%,#eaf1f9_100%)]" >
+      <PageSection className="bg-[var(--color-form-backdrop,#dce5ed)] [--color-muted-raw:var(--color-foreground-soft)]">
         <PageContainer>
           <div id="formulario-cotacao" className="scroll-mt-28">
-            <p className="mb-6 text-center text-sm font-medium text-[var(--color-muted-raw)]">Preencha os dados da sua carga para continuar.</p>
             <EslQuoteForm
               approvalWhatsappUrl={quotePage.approvalChannel.whatsappUrl}
               unservedOrigin={quotePage.unservedOrigin}
