@@ -38,7 +38,7 @@ export default function BrazilMapWrapper({ units }: { units: HomeRegionalUnit[] 
   return (
     <div
       ref={boundaryRef}
-      className="min-h-[1340px] lg:min-h-[900px]"
+      className="relative min-h-[555px] min-[701px]:min-h-[500px]"
     >
       {shouldRender ? <BrazilMap units={units} /> : <MapPlaceholder />}
     </div>
@@ -48,7 +48,7 @@ export default function BrazilMapWrapper({ units }: { units: HomeRegionalUnit[] 
 function MapPlaceholder() {
   return (
     <div
-      className="flex min-h-[1340px] w-full items-center justify-center lg:min-h-[900px]"
+      className="absolute inset-0 flex items-center justify-center"
       aria-label="Mapa de unidades será carregado ao se aproximar desta seção"
       role="status"
     >

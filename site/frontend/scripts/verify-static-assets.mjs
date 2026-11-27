@@ -101,6 +101,7 @@ const referenceFiles = [
 const additionalImmutableAssets = [
   { url: "/favicon-rodogarcia-20260718.svg", sha256: "e48f60dc912be33b9c4af9bfecf4529f33e2abb5868616c1d4c7a25c314b3de1" },
   { url: "/logo-rodogarcia.f073ee2cad50.svg", sha256: "f073ee2cad5057c59e55293c539353bafa5c56890286d2b3c4d660d21afe7391" },
+  { url: "/logo-rodogarcia.4acde21f6ebf.svg", sha256: "4acde21f6ebf43a195f4e40e4a1091d34f7a1725beaf2ea3739ce24d022b537d" },
   { url: "/home-atendimento-poster.741b9476c78e.webp", sha256: "741b9476c78ebfbf8c0fbdec8149ca0f472b073cde9001f31c51540badbb88b5" },
   { url: "/home-atendimento-silent.c9c72d26fc63.webm", sha256: "c9c72d26fc636ebbca1d66efd81f6a845d118c022dfbe852c101527566cbc58b" },
   { url: "/home-caminhoes-poster.f5746017ec72.webp", sha256: "f5746017ec72d30f33ba3f871ebbbe99bd5f573f86259671405062f1511410b2" },
@@ -116,6 +117,7 @@ const additionalImmutableAssets = [
 ];
 
 const mutableAssetUrls = [
+  "/logo.svg",
   "/caminhoes1.webm",
   "/caminhoneiro.webm",
   "/caminhoneiro1.webp",

@@ -238,7 +238,7 @@ function TestimonialNavButton({ label, direction, onClick }: { label: string; di
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.075] text-white/85 shadow-[0_12px_28px_rgba(2,6,23,0.24)] backdrop-blur-md transition-[background-color,border-color,transform,color] duration-200 hover:-translate-y-px hover:border-white/25 hover:bg-white/[0.14] hover:text-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/20 motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:flex"
+      className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-md text-white/85 transition-colors duration-200 hover:text-sky-200 focus-visible:outline-2 focus-visible:outline-white/60 motion-reduce:transition-none sm:flex"
     >
       {direction === "previous" ? <CaretLeft size={20} weight="bold" aria-hidden="true" /> : <CaretRight size={20} weight="bold" aria-hidden="true" />}
     </button>

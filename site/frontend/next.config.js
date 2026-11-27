@@ -58,6 +58,7 @@ const immutablePublicAssetPaths = [
   "/certificados/policia-civil-sp.57269b3e1bdd.webp",
   "/favicon-rodogarcia-20260718.svg",
   "/logo-rodogarcia.f073ee2cad50.svg",
+  "/logo-rodogarcia.4acde21f6ebf.svg",
   "/home-atendimento-poster.741b9476c78e.webp",
   "/home-atendimento-silent.c9c72d26fc63.webm",
   "/home-caminhoes-poster.f5746017ec72.webp",

@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { FooterGlobalContent } from "@/types/content";
 import { DEFAULT_FOOTER_LINKS } from "@/lib/footerLinksDefaults";
 import { fetchPublicContent } from "@/lib/api";
+import { RODOGARCIA_WORDMARK } from "@/lib/brand";
 import { cn } from "@/lib/utils";
 import { site } from "@/lib/routes";
 import CookieSettingsButton from "@/components/CookieSettingsButton";
@@ -36,11 +37,9 @@ export async function SiteFooter() {
           <div className="col-span-2 flex flex-col gap-5 border-b border-white/10 pb-8 sm:col-span-2 lg:col-span-1 lg:border-b-0 lg:pb-0">
             <Link href={site.home} aria-label="Rodogarcia - Página inicial">
               <Image
-                src="/logo-rodogarcia.f073ee2cad50.svg"
+                {...RODOGARCIA_WORDMARK}
                 alt="Rodogarcia"
-                width={160}
-                height={30}
-                className="brightness-0 invert"
+                className="h-auto w-40 brightness-0 invert"
               />
             </Link>
             <p className="max-w-[34ch] text-sm leading-7 text-white/60">

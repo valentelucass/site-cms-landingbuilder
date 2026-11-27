@@ -7,6 +7,7 @@ import { ShellLayout } from "@/components/layout/ShellLayout";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteHeaderLoader } from "@/components/layout/SiteHeaderLoader";
+import { RODOGARCIA_WORDMARK } from "@/lib/brand";
 import { DEFAULT_HEADER_NAVIGATION } from "@/lib/headerNavigationDefaults";
 import { seo } from "@/lib/routes";
 
@@ -57,7 +58,7 @@ const structuredData = {
   "@type": ["Organization", "LocalBusiness"],
   name: "Rodogarcia Transportes",
   url: seo.baseUrl,
-  logo: seo.absoluteUrl("/logo-rodogarcia.f073ee2cad50.svg"),
+  logo: seo.absoluteUrl(RODOGARCIA_WORDMARK.src),
   image: seo.absoluteUrl(seo.defaultOgImage),
   description:
     "Soluções logísticas nacionais com transporte fracionado, distribuição e cargas especiais.",

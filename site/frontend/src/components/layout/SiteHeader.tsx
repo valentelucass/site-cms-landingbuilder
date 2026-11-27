@@ -1,30 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Briefcase,
-  Buildings,
-  Calculator,
-  ChatCircleDots,
-  GearSix,
-  HouseLine,
-  Info,
-  Lightbulb,
-  List,
-  MagnifyingGlass,
-  ShieldCheck,
-  Truck,
-  X,
-} from "@phosphor-icons/react";
+import { Calculator, List, MagnifyingGlass } from "@phosphor-icons/react";
 import { usePathname } from "next/navigation";
 import { useScrollDirection } from "@/hooks/useScrollDirection";
+import { RODOGARCIA_WORDMARK } from "@/lib/brand";
 import { site } from "@/lib/routes";
 import { DEFAULT_HEADER_NAVIGATION } from "@/lib/headerNavigationDefaults";
-import type { HeaderNavigationContent, NavigationHighlightTone } from "@/types/content";
+import type { HeaderNavigationContent } from "@/types/content";
 import { SiteSearchPanel } from "@/components/search/SiteSearchPanel";
 import { useSiteSearch } from "@/components/search/SiteSearchProvider";
+import { SiteNavigationDrawer } from "./SiteNavigationDrawer";
 
 const DARK_HERO_ROUTES = [
   site.home,
@@ -42,33 +30,6 @@ const DARK_HERO_ROUTES = [
   site.voice,
   site.improvements,
 ] as const;
-
-type MenuIcon = ComponentType<{
-  size?: number;
-  weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
-  className?: string;
-  "aria-hidden"?: boolean;
-}>;
-
-const MENU_ICONS: Record<string, MenuIcon> = {
-  home: HouseLine,
-  services: GearSix,
-  about: Info,
-  business: Buildings,
-  contact: ChatCircleDots,
-  careers: Briefcase,
-  quote: Calculator,
-  collections: Truck,
-  voice: ShieldCheck,
-  improvements: Lightbulb,
-};
-
-const HIGHLIGHT_STYLES: Record<NavigationHighlightTone, { inactive: string; active: string; icon: string; label: string }> = {
-  blue: { inactive: "border-blue-100 bg-blue-50 text-[var(--primary)] hover:border-blue-200 hover:bg-blue-100", active: "bg-[var(--primary)] text-white shadow-[0_10px_22px_rgba(29,78,216,0.24)]", icon: "border-blue-200 bg-white text-[var(--primary)]", label: "text-blue-500" },
-  emerald: { inactive: "border-emerald-100 bg-emerald-50 text-emerald-700 hover:border-emerald-200 hover:bg-emerald-100", active: "bg-emerald-600 text-white shadow-[0_10px_22px_rgba(5,150,105,0.24)]", icon: "border-emerald-200 bg-white text-emerald-700", label: "text-emerald-600" },
-  amber: { inactive: "border-amber-100 bg-amber-50 text-amber-700 hover:border-amber-200 hover:bg-amber-100", active: "bg-amber-500 text-white shadow-[0_10px_22px_rgba(245,158,11,0.24)]", icon: "border-amber-200 bg-white text-amber-700", label: "text-amber-600" },
-  violet: { inactive: "border-violet-100 bg-violet-50 text-violet-700 hover:border-violet-200 hover:bg-violet-100", active: "bg-violet-600 text-white shadow-[0_10px_22px_rgba(124,58,237,0.24)]", icon: "border-violet-200 bg-white text-violet-700", label: "text-violet-600" },
-};
 
 function matchesRoute(pathname: string, href: string) {
   if (href === site.home) return pathname === site.home;
@@ -160,25 +121,16 @@ export function SiteHeader({
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [closeSearch, searchOpen]);
 
-  const isActive = (href: string) => {
-    if (href === site.home) return pathname === site.home;
-    return pathname.startsWith(href);
-  };
-  const navigationGroups = [
-    { label: "Principal", items: navigation.items.filter((item) => item.group === "principal") },
-    { label: "Explorar", items: navigation.items.filter((item) => item.group === "explorar") },
-  ];
-
   const iconButtonClassName = [
     "p-2 rounded-full transition-colors duration-[400ms] ease-out z-10",
     useLightChrome ? "text-white hover:bg-white/10" : "text-[var(--foreground)] hover:bg-black/5",
   ].join(" ");
 
-  const logoStateClassName = isOverlay
+  const logoWidthClassName = isOverlay
     ? useLightChrome
-      ? "translate-y-4 scale-[1.30]"
-      : "translate-y-2 scale-[1.14]"
-    : "translate-y-0 scale-100";
+      ? "w-52"
+      : "w-[11.4rem]"
+    : "w-40";
 
   const quoteButtonClassName = [
     "p-2.5 rounded-full transition-all duration-[400ms] ease-out shadow-sm hover:shadow-md",
@@ -215,6 +167,7 @@ export function SiteHeader({
               className={iconButtonClassName}
               aria-label={drawerOpen ? "Fechar menu" : "Abrir menu"}
               aria-expanded={drawerOpen}
+              aria-haspopup="dialog"
               aria-controls="site-mobile-nav"
               onClick={() => setDrawerOpen(true)}
             >
@@ -225,9 +178,9 @@ export function SiteHeader({
           <Link
             href={site.home}
             className={[
-              "absolute left-1/2 flex shrink-0 items-center -translate-x-1/2",
-              "transition-all duration-[400ms] ease-out",
-              logoStateClassName,
+              "absolute top-1/2 left-1/2 max-w-[calc(100%-9rem)] -translate-x-1/2 -translate-y-1/2",
+              "transition-[width] duration-[400ms] ease-out motion-reduce:transition-none",
+              logoWidthClassName,
             ].join(" ")}
             aria-label="Rodogarcia - Pagina inicial"
             onClick={(e) => {
@@ -238,12 +191,10 @@ export function SiteHeader({
             }}
           >
             <Image
-              src="/logo-rodogarcia.f073ee2cad50.svg"
+              {...RODOGARCIA_WORDMARK}
               alt="Rodogarcia"
-              width={160}
-              height={30}
               className={[
-                "transition-all duration-[400ms] ease-out",
+                "block h-auto w-full transition-[filter] duration-[400ms] ease-out motion-reduce:transition-none",
                 useLightChrome ? "brightness-0 invert drop-shadow-md" : "",
               ].join(" ")}
             />
@@ -276,72 +227,16 @@ export function SiteHeader({
         <SiteSearchPanel open={searchOpen} onClose={closeSearch} />
       </header>
 
-      <div
-        className={[
-          "fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-lg transition-all duration-[500ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-          drawerOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-        ].join(" ")}
-        aria-hidden="true"
-        onClick={() => setDrawerOpen(false)}
+      <SiteNavigationDrawer
+        open={drawerOpen}
+        navigation={navigation}
+        isActive={(href) => matchesRoute(pathname, href)}
+        onClose={() => setDrawerOpen(false)}
+        onSearch={() => {
+          setDrawerOpen(false);
+          openSearch();
+        }}
       />
-
-      <aside
-        id="site-mobile-nav"
-        aria-label="Menu de navegacao"
-        aria-hidden={!drawerOpen}
-        inert={!drawerOpen}
-        className={[
-          "fixed top-0 left-0 z-50 h-full w-80 max-w-[90vw] bg-white",
-          "flex flex-col shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          drawerOpen ? "translate-x-0" : "-translate-x-full",
-        ].join(" ")}
-      >
-        <div className="flex items-center justify-between border-b border-black/8 px-6 py-5">
-          <Image src="/logo-rodogarcia.f073ee2cad50.svg" alt="Rodogarcia" width={140} height={26} />
-          <button
-            type="button"
-            aria-label="Fechar menu"
-            className="rounded-full p-2 transition-colors hover:bg-black/5"
-            onClick={() => setDrawerOpen(false)}
-          >
-            <X size={20} weight="bold" />
-          </button>
-        </div>
-
-        <nav className="flex flex-1 flex-col gap-6 overflow-y-auto p-4" aria-label="Navegação principal">
-          {navigationGroups.filter((group) => group.items.length > 0).map((group) => <section key={group.label}><p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">{group.label}</p><div className="flex flex-col gap-1">{group.items.map(({ id, url, label, icon, highlightLabel, highlightTone }) => {
-            const Icon = MENU_ICONS[icon] ?? Info;
-            const active = isActive(url);
-            const highlight = highlightLabel ? HIGHLIGHT_STYLES[highlightTone ?? "blue"] : null;
-            return <Link key={id} href={url} prefetch={url.startsWith("/") && !url.startsWith("//") ? drawerOpen : false} onClick={() => setDrawerOpen(false)} className={[
-              "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
-              highlight ? active ? highlight.active : highlight.inactive : active ? "bg-[var(--color-primary-soft)] text-[var(--primary)]" : "text-[var(--foreground)] hover:bg-black/5",
-            ].join(" ")}><span className={[
-              "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border transition-colors",
-              highlight ? active ? "border-white/20 bg-white/16 text-white" : highlight.icon : active ? "border-[var(--primary)]/15 bg-white/70 text-[var(--primary)]" : "border-slate-200/70 bg-slate-50 text-slate-500",
-            ].join(" ")} aria-hidden="true"><Icon size={17} weight={active || Boolean(highlight) ? "fill" : "duotone"} /></span><span className="min-w-0 leading-none">{label}</span>{highlightLabel ? <span className={active ? "ml-auto text-[9px] font-bold uppercase tracking-[0.14em] text-white/78" : `ml-auto text-[9px] font-bold uppercase tracking-[0.14em] ${highlight!.label}`}>{highlightLabel}</span> : null}</Link>;
-          })}</div></section>)}
-        </nav>
-
-        <div className="flex flex-col gap-2 border-t border-black/8 p-4">
-          <button
-            type="button"
-            onClick={() => { setDrawerOpen(false); openSearch(); }}
-            className="w-full rounded-xl border border-black/12 px-4 py-2.5 text-left text-sm font-medium transition-colors hover:bg-black/5 flex items-center gap-2"
-          >
-            <MagnifyingGlass size={16} weight="bold" className="text-[var(--primary)]" aria-hidden="true" />
-            Buscar no site
-          </button>
-          <Link
-            href={site.quote}
-            prefetch={drawerOpen}
-            onClick={() => setDrawerOpen(false)}
-            className="w-full rounded-xl bg-[var(--primary)] px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-[var(--color-primary-strong)]"
-          >
-            Solicitar cotação
-          </Link>
-        </div>
-      </aside>
     </>
   );
 }

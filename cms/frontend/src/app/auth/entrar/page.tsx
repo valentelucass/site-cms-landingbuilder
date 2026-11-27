@@ -164,7 +164,7 @@ function LoginForm() {
             src="/logo.svg"
             alt="Rodogarcia"
             width={156}
-            height={30}
+            height={18}
             className={`h-auto w-[136px] transition duration-300 group-hover:opacity-80 sm:w-[156px] ${darkTheme ? "brightness-0 invert" : ""}`}
           />
           <span className={`hidden h-5 w-px sm:block ${darkTheme ? "bg-white/20" : "bg-slate-300"}`} />

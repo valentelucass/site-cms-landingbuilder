@@ -57,6 +57,7 @@ async function verifyLoadingAndDomContracts() {
     services,
     mapWrapper,
     header,
+    drawer,
     search,
     home,
     presentedVideo,
@@ -76,6 +77,7 @@ async function verifyLoadingAndDomContracts() {
     source("src/components/home/ServiceLinesRebrand.tsx"),
     source("src/components/home/BrazilMapWrapper.tsx"),
     source("src/components/layout/SiteHeader.tsx"),
+    source("src/components/layout/SiteNavigationDrawer.tsx"),
     source("src/components/search/SiteSearchPanel.tsx"),
     source("src/app/page.tsx"),
     source("src/components/media/PresentedVideo.tsx"),
@@ -119,10 +121,12 @@ async function verifyLoadingAndDomContracts() {
 
   assert.match(mapWrapper, /IntersectionObserver/);
   assert.match(mapWrapper, /rootMargin:\s*"600px 0px"/);
-  assert.match(mapWrapper, /min-h-\[1340px\].*lg:min-h-\[900px\]/);
+  assert.match(mapWrapper, /min-h-\[555px\].*min-\[701px\]:min-h-\[500px\]/);
   assert.match(mapWrapper, /shouldRender\s*\?\s*<BrazilMap/);
   assert.doesNotMatch(header, /fetch\s*\(/);
-  assert.match(header, /prefetch=\{[^\n]*drawerOpen/);
+  assert.match(header, /<SiteNavigationDrawer[\s\S]*?open=\{drawerOpen\}/);
+  assert.match(drawer, /prefetch=\{open &&/);
+  assert.match(drawer, /prefetch=\{open\}/);
   assert.match(search, /prefetch=\{open\}/);
   assert.match(home, /fetchPublicContent\(\)\.catch/);
   assert.match(home, /homePage\.certifications/);
@@ -188,13 +192,13 @@ async function verifyLoadingAndDomContracts() {
 }
 
 async function verifyAccessibilityContracts() {
-  const [quickActions, testimonials, consent, hero, services, header] = await Promise.all([
+  const [quickActions, testimonials, consent, hero, services, drawer] = await Promise.all([
     source("src/components/home/QuickActionsSection.tsx"),
     source("src/components/home/TestimonialsCarousel.tsx"),
     source("src/components/analytics/ConsentBanner.tsx"),
     source("src/components/home/HeroCarousel.tsx"),
     source("src/components/home/ServiceLinesRebrand.tsx"),
-    source("src/components/layout/SiteHeader.tsx"),
+    source("src/components/layout/SiteNavigationDrawer.tsx"),
   ]);
 
   assert.doesNotMatch(quickActions, /\breadOnly\b/);
@@ -214,7 +218,9 @@ async function verifyAccessibilityContracts() {
   assert.match(hero, /inert=\{!isCurrent\}/);
   assert.match(hero, /h-11 w-11/);
   assert.match(services, /h-11 w-11/);
-  assert.match(header, /inert=\{!drawerOpen\}/);
+  assert.match(drawer, /<dialog\b/);
+  assert.match(drawer, /panel\.showModal\(\)/);
+  assert.match(drawer, /panel\.close\(\)/);
 }
 
 await Promise.all([

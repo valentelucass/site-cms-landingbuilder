@@ -156,7 +156,7 @@ export default async function HomePage() {
             <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
             Compliance e qualidade
           </span>
-          <h2 className="mt-3 max-w-[26ch] text-[clamp(1.5rem,2.4vw,2.15rem)] font-extrabold leading-tight tracking-[-0.035em] text-[var(--foreground)]">
+          <h2 className="mt-3 text-balance text-[clamp(1.5rem,2.4vw,2.15rem)] font-extrabold leading-tight tracking-[-0.035em] text-[var(--foreground)]">
             Certificações que reforçam nossa operação.
           </h2>
         </div>

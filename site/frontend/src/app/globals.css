@@ -201,7 +201,7 @@
       linear-gradient(180deg, #f8fbff 0%, #eef4fb 26%, #eaf1f9 58%, #f8fbff 100%);
   }
 
-  body.has-nav-open,
+  html.has-nav-open,
   body.has-modal-open {
     overflow: hidden;
   }

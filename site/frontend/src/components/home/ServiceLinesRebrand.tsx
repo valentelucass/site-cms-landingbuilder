@@ -74,25 +74,22 @@ export default function ServiceLinesRebrand({
 
       <div className="relative mx-auto max-w-[1440px] px-6">
         <div className="grid gap-12 lg:grid-cols-[380px_minmax(0,1fr)] xl:grid-cols-[440px_minmax(0,1fr)] xl:gap-16">
-          <div className="flex flex-col justify-between gap-8 pt-2">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-[var(--primary)]/10 bg-[var(--color-primary-soft)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--primary)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
-                {section.badge}
-              </span>
-              <h2 className="mt-6 text-[clamp(2rem,3.8vw,3.2rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-[var(--foreground)] [text-wrap:balance]">
-                {section.title}
-              </h2>
-              <p className="mt-5 max-w-[32rem] text-[15px] leading-relaxed text-[var(--color-muted-raw)] sm:text-[17px]">
-                {section.description}
-              </p>
-            </div>
-
+          <div className="min-w-0 pt-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--primary)]/10 bg-[var(--color-primary-soft)] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.24em] text-[var(--primary)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
+              {section.badge}
+            </span>
+            <h2 className="mt-6 text-[clamp(2rem,3.8vw,3.2rem)] font-extrabold leading-[1.05] tracking-[-0.03em] text-[var(--foreground)] [text-wrap:balance]">
+              {section.title}
+            </h2>
+            <p className="mt-5 max-w-[32rem] text-[15px] leading-relaxed text-[var(--color-muted-raw)] sm:text-[17px]">
+              {section.description}
+            </p>
             <Link
               href={section.ctaUrl}
-              className="hidden w-fit items-center gap-2 rounded-full bg-[var(--primary)] px-6 py-3.5 text-sm font-bold text-white shadow-[0_12px_24px_rgba(29,78,216,0.24)] transition-all duration-300 hover:-translate-y-1 hover:bg-[var(--color-primary-strong)] hover:shadow-[0_16px_32px_rgba(29,78,216,0.32)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 lg:inline-flex"
+              className="mt-6 inline-flex min-h-12 max-w-full items-center gap-2 rounded-full bg-[var(--primary)] px-6 py-2.5 text-sm font-bold text-white shadow-[0_10px_22px_rgba(29,78,216,0.2)] transition-[background-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:bg-[var(--color-primary-strong)] hover:shadow-[0_14px_26px_rgba(29,78,216,0.26)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
             >
-              {section.ctaLabel}
+              <span>{section.ctaLabel}</span>
               <ArrowRightIcon />
             </Link>
           </div>
@@ -138,16 +135,6 @@ export default function ServiceLinesRebrand({
               </div>
             ) : null}
           </div>
-        </div>
-
-        <div className="mt-10 lg:hidden">
-          <Link
-            href={section.ctaUrl}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--primary)] px-6 py-4 text-sm font-bold text-white shadow-[0_12px_24px_rgba(29,78,216,0.24)] transition-all duration-300 hover:-translate-y-1 hover:bg-[var(--color-primary-strong)] hover:shadow-[0_16px_32px_rgba(29,78,216,0.32)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-          >
-            {section.ctaLabel}
-            <ArrowRightIcon />
-          </Link>
         </div>
       </div>
     </section>
@@ -232,7 +219,7 @@ function ServiceCard({
 
 function ArrowRightIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0" aria-hidden="true">
       <path d="M2.667 8h10.666M8.667 3.333 13.333 8l-4.666 4.667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
 import { external, site } from "@/lib/routes";
 import type { HomeHeroButton } from "@/types/content";
+import TrackingDockAnimation from "./TrackingDockAnimation";
 
 export default function TrackingLookupSection({ buttons }: { buttons?: HomeHeroButton[] }) {
   const primaryButton = buttons?.[0] ?? {
@@ -14,67 +15,74 @@ export default function TrackingLookupSection({ buttons }: { buttons?: HomeHeroB
     url: site.help,
     enabled: true,
   };
+  const showPrimary = primaryButton.enabled !== false;
+  const showSecondary = secondaryButton.enabled !== false;
+
   return (
     <section
-      className="relative overflow-hidden py-16 sm:py-20 lg:py-24"
+      className="relative isolate overflow-hidden border-y border-blue-950/8 bg-[radial-gradient(ellipse_at_50%_38%,#fbfdff_0%,#edf5ff_58%,#e3edf9_100%)] py-14 sm:py-16 lg:py-14"
       aria-labelledby="tracking-section-title"
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(148,163,184,0.34),transparent)]" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-[linear-gradient(90deg,transparent,rgba(148,163,184,0.22),transparent)]" />
-      <div className="pointer-events-none absolute left-1/2 top-12 h-44 w-[44rem] max-w-[92vw] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(29,78,216,0.18)_0%,rgba(56,189,248,0.1)_34%,transparent_72%)] blur-3xl" />
-      <div className="pointer-events-none absolute left-1/2 top-28 h-28 w-[30rem] max-w-[82vw] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0)_72%)]" />
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_6%_100%,rgba(29,78,216,0.16),transparent_48%),radial-gradient(ellipse_at_100%_0%,rgba(8,145,178,0.12),transparent_48%)]"
+        aria-hidden="true"
+      />
+      <div
+        className="decorative-grid pointer-events-none absolute inset-0 -z-10 [mask-image:linear-gradient(90deg,#000,transparent_30%,transparent_70%,#000)]"
+        data-theme="light"
+        aria-hidden="true"
+      />
 
-      <div className="mx-auto max-w-[1440px] px-6">
-        <div className="relative mx-auto flex max-w-[920px] flex-col items-center text-center">
-          <p className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/72 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--primary)] shadow-[0_10px_24px_rgba(15,23,42,0.06)] backdrop-blur-md">
-            <span className="h-2 w-2 rounded-full bg-[var(--accent)] shadow-[0_0_0_6px_rgba(6,182,212,0.12)]" />
-            área de rastreio
+      <div className="mx-auto grid w-full max-w-[1440px] items-center justify-items-center gap-y-8 px-6 sm:gap-y-10 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1fr)] lg:gap-x-6 lg:px-10 xl:gap-x-10">
+        <div className="flex w-full min-w-0 flex-col items-center text-center lg:items-start lg:text-left">
+          <p className="inline-flex items-center gap-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--color-primary-strong)]">
+            <span className="size-1.5 rounded-full bg-cyan-600" aria-hidden="true" />
+            Área de rastreio
+          </p>
+          <h2
+            id="tracking-section-title"
+            className="mt-4 text-balance text-[clamp(2.15rem,3.75vw,3.65rem)] font-bold leading-[1.02] tracking-[-0.055em] text-[var(--foreground)]"
+          >
+            Rastreie sua carga agora.
+          </h2>
+          <p className="mt-4 max-w-[48ch] text-pretty text-sm leading-relaxed text-[var(--color-muted-raw)] sm:text-base">
+            Entre direto no portal oficial para consultar o andamento da remessa.
           </p>
 
-          <div className="mt-6 max-w-[760px]">
-            <h2
-              id="tracking-section-title"
-              className="text-[clamp(2.6rem,5.4vw,4.8rem)] font-bold leading-[0.92] tracking-[-0.065em] text-[var(--foreground)]"
-            >
-              Rastreie sua carga agora.
-            </h2>
+          {(showPrimary || showSecondary) && (
+            <div className="mt-7 flex w-full flex-wrap items-center justify-center gap-x-2 gap-y-1 sm:gap-x-4 lg:justify-start">
+              {showPrimary && (
+                <a
+                  href={primaryButton.url || external.tracking}
+                  target={(primaryButton.url || "").startsWith("http") ? "_blank" : undefined}
+                  rel={(primaryButton.url || "").startsWith("http") ? "noopener noreferrer" : undefined}
+                  className="inline-flex min-h-13 max-w-full items-center justify-center gap-2.5 rounded-full bg-[var(--primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-[0_12px_25px_rgba(29,78,216,0.24)] transition-[background-color,box-shadow] hover:bg-[var(--color-primary-strong)] hover:shadow-[0_14px_30px_rgba(29,78,216,0.3)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)] sm:px-6"
+                  aria-label="Acessar rastreio oficial"
+                >
+                  <span className="min-w-0 wrap-anywhere">{primaryButton.label || "Rastrear agora"}</span>
+                  <ArrowUpRight size={16} weight="bold" className="shrink-0" aria-hidden="true" />
+                </a>
+              )}
 
-            <p className="mx-auto mt-5 max-w-[46ch] text-sm leading-7 text-[var(--color-muted-raw)] sm:text-base">
-              Entre direto no portal oficial para consultar o andamento da
-              remessa.
-            </p>
-          </div>
+              {showSecondary && (
+                <Link
+                  href={secondaryButton.url || site.help}
+                  target={(secondaryButton.url || "").startsWith("http") ? "_blank" : undefined}
+                  rel={(secondaryButton.url || "").startsWith("http") ? "noopener noreferrer" : undefined}
+                  className="group inline-flex min-h-13 max-w-full items-center justify-center gap-2 rounded-full px-3 py-2.5 text-sm font-semibold text-[var(--color-primary-strong)] hover:text-[var(--primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] sm:px-4"
+                >
+                  <span className="min-w-0 wrap-anywhere underline decoration-[var(--primary)]/30 underline-offset-4 group-hover:decoration-current">
+                    {secondaryButton.label || "Como consultar"}
+                  </span>
+                  <ArrowRight size={16} weight="bold" className="shrink-0" aria-hidden="true" />
+                </Link>
+              )}
+            </div>
+          )}
+        </div>
 
-          <div className="mt-10 flex w-full max-w-[620px] flex-col items-stretch justify-center gap-4 sm:flex-row sm:items-center">
-            {primaryButton.enabled !== false ? (
-              <a
-                href={primaryButton.url || external.tracking}
-                target={(primaryButton.url || "").startsWith("http") ? "_blank" : undefined}
-                rel={(primaryButton.url || "").startsWith("http") ? "noopener noreferrer" : undefined}
-                className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[linear-gradient(135deg,#1d4ed8_0%,#2563eb_54%,#38bdf8_100%)] px-5 pl-6 pr-5 text-sm font-semibold text-white shadow-[0_22px_52px_rgba(29,78,216,0.28)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_64px_rgba(29,78,216,0.34)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/18 sm:flex-1"
-                aria-label="Acessar rastreio oficial"
-              >
-                <span>{primaryButton.label || "Rastrear agora"}</span>
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/16 ring-1 ring-white/18 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
-                  <ArrowUpRight size={16} weight="bold" />
-                </span>
-              </a>
-            ) : null}
-
-            {secondaryButton.enabled !== false ? (
-              <Link
-                href={secondaryButton.url || site.help}
-                target={(secondaryButton.url || "").startsWith("http") ? "_blank" : undefined}
-                rel={(secondaryButton.url || "").startsWith("http") ? "noopener noreferrer" : undefined}
-                className="group inline-flex h-14 w-full items-center justify-center gap-3 rounded-full border border-white/72 bg-white/76 px-5 pl-6 pr-5 text-sm font-semibold text-[var(--foreground)] shadow-[0_16px_34px_rgba(15,23,42,0.08)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-[var(--primary)]/18 hover:bg-white focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--primary)]/12 sm:flex-1"
-              >
-                <span>{secondaryButton.label || "Como consultar"}</span>
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-primary-soft)] text-[var(--primary)] transition-transform duration-300 group-hover:translate-x-0.5">
-                  <ArrowRight size={16} weight="bold" />
-                </span>
-              </Link>
-            ) : null}
-          </div>
+        <div className="w-full min-w-0 max-w-[44rem]">
+          <TrackingDockAnimation />
         </div>
       </div>
     </section>
