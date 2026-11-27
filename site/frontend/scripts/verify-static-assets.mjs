@@ -99,6 +99,7 @@ const referenceFiles = [
 ];
 
 const additionalImmutableAssets = [
+  { url: "/rodogarcia-proprietarios.4d53819f56e3.webp", sha256: "4d53819f56e364e27f0ed40ef8a426c53cd19abe9f08915f683759b6cd8f47b6" },
   { url: "/favicon-rodogarcia-20260718.svg", sha256: "e48f60dc912be33b9c4af9bfecf4529f33e2abb5868616c1d4c7a25c314b3de1" },
   { url: "/logo-rodogarcia.f073ee2cad50.svg", sha256: "f073ee2cad5057c59e55293c539353bafa5c56890286d2b3c4d660d21afe7391" },
   { url: "/logo-rodogarcia.4acde21f6ebf.svg", sha256: "4acde21f6ebf43a195f4e40e4a1091d34f7a1725beaf2ea3739ce24d022b537d" },

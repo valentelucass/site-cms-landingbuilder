@@ -42,6 +42,7 @@ const nextBuildDistDir = process.env.NEXT_BUILD_DIST_DIR?.trim() || ".next";
 // imutável. URLs históricas sem versão permanecem com o TTL revalidável do
 // servidor para que um rollback não fique preso no navegador.
 const immutablePublicAssetPaths = [
+  "/rodogarcia-proprietarios.4d53819f56e3.webp",
   "/36-anos-rodogarcia.4c43a61efb46.webp",
   "/capilaridade-rodogarcia.d6d0bb115823.webp",
   "/motorista-rodogarcia.abbf7875cfae.webp",

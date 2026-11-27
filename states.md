@@ -1,5 +1,11 @@
 # Estado Atual do Sistema — Site Rodogarcia
 
+## Página Sobre · 27/11/2026
+
+O retrato dos proprietários, criado com IA a partir da referência fornecida, é a mídia inicial de `aboutPage.hero.media`. O WebP acompanha o site em `public/`, e o filtro de cor é aplicado na abertura durante a exibição. A mídia pode ser substituída pelo CMS.
+
+A abertura usa a composição **Foto integrada**. Texto e foto compartilham as margens do conteúdo. A grade atravessa a seção e aparece gradualmente nas bordas da imagem. No celular, a foto aparece acima do título. Os indicadores ficam abaixo das ações, e o conteúdo e o enquadramento da mídia continuam configuráveis pelo CMS.
+
 ## Presença regional · 27/11/2026
 
 O realce com o ponteiro acompanha o estado, sua sigla e a linha de chamada. A seleção da unidade acontece no clique. O relevo e as divisas têm contornos mais finos.

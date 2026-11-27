@@ -38,6 +38,7 @@ const HOME_CERTIFICATION_ALIASES: Readonly<Record<string, string>> = {
 };
 
 const KNOWN_IMAGE_DIMENSIONS: Readonly<Record<string, KnownImageDimensions>> = {
+  "/rodogarcia-proprietarios.4d53819f56e3.webp": { width: 1536, height: 1024 },
   "/36-anos-rodogarcia.4c43a61efb46.webp": { width: 1440, height: 785 },
   "/operacao-indoor-rodogarcia.d6f36f33e258.webp": { width: 1280, height: 1280 },
   "/capilaridade-rodogarcia.d6d0bb115823.webp": { width: 1280, height: 551 },

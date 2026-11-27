@@ -1,9 +1,6 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { ActionLink, PageContainer, type PageAction } from "./PageContent";
 import { site } from "@/lib/routes";
-import { cn } from "@/lib/utils";
+
 import { PresentedImage } from "@/components/media/PresentedImage";
 import type { PageMedia } from "@/types/content";
 
@@ -38,145 +35,64 @@ export function AboutHero({
       ];
 
   return (
-    <section className="relative overflow-hidden bg-[#020617] pb-16 pt-32 text-white sm:pb-20 sm:pt-40 lg:pb-24 lg:pt-48">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,0.15)_0%,rgba(2,6,23,1)_70%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.025)_0%,transparent_60%)]" />
-      <div className="decorative-grid absolute inset-0" data-theme="dark" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--primary)]/30 to-transparent opacity-80" />
+    <section aria-labelledby="about-title" className="relative isolate overflow-hidden bg-[#020617] pt-16 text-white md:pt-20">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,.15),transparent_70%)]" />
+      <div aria-hidden="true" className="decorative-grid absolute inset-0 -z-10" data-theme="dark" />
 
-      <motion.div
-        initial={{ opacity: 0, x: -30 }}
-        animate={{ opacity: 0.03, x: 0 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
-        className="pointer-events-none absolute -bottom-10 -left-10 z-0 select-none whitespace-nowrap text-[clamp(8rem,22vw,24rem)] font-bold tracking-tighter sm:-bottom-20 sm:-left-20"
-      >
-        DESDE 1989
-      </motion.div>
-
-      <PageContainer className="relative z-10">
-        <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-          <div className="flex max-w-[780px] flex-col">
-            {eyebrow ? (
-              <motion.span
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-                className="mb-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/12 bg-white/8 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200/82 backdrop-blur-sm"
-              >
-                <span className="h-2 w-2 rounded-full bg-sky-300" />
-                {eyebrow}
-              </motion.span>
-            ) : null}
-
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-[15ch] text-[clamp(3rem,6vw,5.8rem)] font-bold leading-[0.92] tracking-[-0.07em] text-white"
-            >
-              {title}
-            </motion.h1>
-
-            <motion.span
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ delay: 0.8, duration: 0.8, ease: "circOut" }}
-              className="mt-5 h-1 w-28 origin-left bg-sky-400"
+      <PageContainer>
+        <div className="relative">
+          <div className="relative h-[clamp(14rem,62vw,22rem)] [mask-composite:intersect] [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent),linear-gradient(to_bottom,transparent,black_12%,black_72%,transparent)] md:absolute md:-top-12 md:right-0 md:bottom-0 md:h-auto md:w-[58%] md:[mask-image:linear-gradient(to_right,transparent,black_37%,black_80%,transparent),linear-gradient(to_bottom,transparent,black_20%,black_67%,transparent)]">
+            <PresentedImage
+              {...image}
+              alt={image.alt || title}
+              sizes="(min-width: 1440px) 798px, (min-width: 768px) calc(58vw - 2.32rem), 100vw"
+              fetchPriority="high"
+              className="absolute inset-0 h-full w-full object-cover brightness-[0.96] saturate-[0.9]"
             />
+            <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-slate-900/10" />
+          </div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-              className="mt-6 max-w-[60ch] sm:mt-8"
-            >
-              <p className="text-sm leading-7 text-white/68 sm:text-base">
-                {description}
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-              className="mt-8 grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-row sm:flex-wrap"
-            >
+          <div className="relative flex flex-col items-start pb-8 pt-3 md:min-h-[clamp(25rem,34vw,36rem)] md:w-[50%] md:justify-center md:py-14">
+            {eyebrow && (
+              <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-200">
+                <span aria-hidden="true" className="size-1.5 rounded-full bg-sky-300" />
+                {eyebrow}
+              </span>
+            )}
+            <h1 id="about-title" className="mt-3 text-balance text-[clamp(2.25rem,5vw,5rem)] font-bold leading-[1.02] tracking-[-0.055em]">
+              {title}
+            </h1>
+            <p className="mt-4 max-w-[49ch] text-sm leading-relaxed text-slate-300 sm:text-base">
+              {description}
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2">
               {heroButtons.slice(0, 2).map((button, index) => (
                 <ActionLink
                   key={`${button.href}-${index}`}
-                  action={{
-                    ...button,
-                    variant: index === 1 ? "secondary" : button.variant,
-                  }}
+                  action={{ ...button, variant: index === 1 ? "ghost" : button.variant }}
                   tone="dark"
-                  className="w-full min-w-0 sm:w-auto"
+                  className={index === 1
+                    ? "min-h-11 rounded-sm px-0 text-white hover:bg-transparent hover:underline hover:underline-offset-4 sm:px-0"
+                    : "min-h-11 rounded-full shadow-none"}
                 />
               ))}
-            </motion.div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.4, duration: 1 }}
-            className="relative mx-auto mt-12 w-full max-w-[320px] sm:max-w-[420px] lg:ml-auto lg:mt-0 lg:max-w-[480px]"
-          >
-            <div className="pointer-events-none absolute -inset-2 z-0 rounded-[28px] border border-white/10 sm:-inset-4 sm:rounded-[38px]" />
-
-            <div className="relative z-10 aspect-[4/3] overflow-hidden rounded-[24px] border border-white/10 bg-[#0f172a] shadow-2xl sm:aspect-[3/2] sm:rounded-[34px]">
-              <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(180deg,rgba(255,255,255,0.04)_0%,rgba(2,6,23,0.1)_100%)]" />
-              <motion.div
-                initial={{ scale: 1.05, filter: "blur(2px)" }}
-                animate={{ scale: 1, filter: "blur(0px)" }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                className="h-full w-full"
-              >
-                <PresentedImage
-                  {...image}
-                  alt={image.alt || title}
-                  sizes="(max-width: 1023px) 100vw, 42vw"
-                  className="h-full w-full object-cover opacity-80 mix-blend-luminosity"
-                />
-              </motion.div>
-              <div className="pointer-events-none absolute inset-0 z-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZmlsdGVyIGlkPSJub2lzZUZpbHRlciI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2VGaWx0ZXIpIi8+PC9zdmc+')] opacity-[0.1] mix-blend-overlay" />
-              <div className="absolute inset-0 z-10 bg-gradient-to-t from-[var(--foreground)] via-transparent to-transparent" />
             </div>
-          </motion.div>
+          </div>
         </div>
+      </PageContainer>
 
-        {visibleStats.length > 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-            className="mt-16 grid grid-cols-2 items-center gap-x-4 gap-y-10 border-t border-white/10 pt-8 sm:mt-24 sm:flex sm:flex-wrap sm:justify-center sm:gap-16 lg:justify-start"
-          >
-            {visibleStats.map((item, idx) => (
-              <div
-                key={item.label}
-                className={cn(
-                  "flex items-center gap-4 sm:justify-start sm:gap-10",
-                  idx === visibleStats.length - 1
-                    ? "col-span-2 justify-center sm:col-span-1"
-                    : "justify-center"
-                )}
-              >
-                <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
-                  <span className="text-[2rem] font-bold leading-none tracking-[-0.05em] text-white sm:text-[2.5rem]">
-                    {item.value}
-                  </span>
-                  <span className="mt-2 text-[10px] uppercase tracking-[0.2em] text-white/50 sm:text-[11px]">
-                    {item.label}
-                  </span>
-                </div>
-                {idx < visibleStats.length - 1 ? (
-                  <div className="hidden h-12 w-px bg-white/10 sm:block" />
-                ) : null}
+      {visibleStats.length > 0 && (
+        <PageContainer className="pb-9 sm:pb-12">
+          <dl className="grid max-w-[52rem] grid-cols-3 gap-x-3 gap-y-5 border-t border-white/15 pt-5">
+            {visibleStats.map((item, index) => (
+              <div key={`${item.label}-${index}`} className="flex min-w-0 flex-col gap-1">
+                <dt className="text-xs leading-snug text-slate-300 sm:text-sm">{item.label}</dt>
+                <dd className="order-first text-[clamp(1.5rem,3vw,2.75rem)] font-bold leading-none tracking-[-0.05em]">{item.value}</dd>
               </div>
             ))}
-          </motion.div>
-        ) : null}
-      </PageContainer>
+          </dl>
+        </PageContainer>
+      )}
     </section>
   );
 }

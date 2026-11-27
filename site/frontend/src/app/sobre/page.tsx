@@ -16,6 +16,8 @@ import type { AboutPageContent } from "@/types/content";
 
 export const dynamic = "force-dynamic";
 
+const defaultHeroImage = "/rodogarcia-proprietarios.4d53819f56e3.webp";
+
 const fallbackMetadata: Metadata = {
   title: "Sobre a Rodogarcia",
   description:
@@ -29,14 +31,14 @@ const fallbackMetadata: Metadata = {
     description:
       "História, cultura, cobertura e disciplina operacional para crescer com consistência.",
     url: seo.absoluteUrl(site.about),
-    images: [{ url: seo.absoluteUrl("/motorista-rodogarcia.abbf7875cfae.webp") }],
+    images: [{ url: seo.absoluteUrl(defaultHeroImage) }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Sobre a Rodogarcia | Logística com visão de longo prazo",
     description:
       "Veja como a Rodogarcia combina experiência operacional, capilaridade e consistência.",
-    images: [seo.absoluteUrl("/motorista-rodogarcia.abbf7875cfae.webp")],
+    images: [seo.absoluteUrl(defaultHeroImage)],
   },
   robots: {
     index: true,
@@ -83,7 +85,7 @@ const FALLBACK_ABOUT_PAGE: AboutPageContent = {
       { value: "1.500+", label: "Pontos de coleta" },
       { value: "1M+", label: "Pacotes processados" },
     ],
-    media: { src: "/motorista-rodogarcia.abbf7875cfae.webp", alt: "Operação Rodogarcia em movimento" },
+    media: { src: defaultHeroImage, alt: "Retrato dos proprietários da Rodogarcia no pátio da transportadora" },
     buttons: [
       { label: "Solicitar cotação", url: site.quote },
       { label: "Conhecer serviços", url: site.services },
