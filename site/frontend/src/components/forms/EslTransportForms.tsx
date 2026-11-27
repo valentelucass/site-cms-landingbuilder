@@ -422,9 +422,8 @@ function useFormSteps(focusResult: boolean) {
   return { step, direction, navigate, headingRef, formRef, headingId };
 }
 
-function StepProgress({ label, description, steps, step, disabled, onBack }: {
+function StepProgress({ label, steps, step, disabled, onBack }: {
   label: string;
-  description?: string;
   steps: ReadonlyArray<{ id: string; label: string }>;
   step: number;
   disabled: boolean;
@@ -432,7 +431,6 @@ function StepProgress({ label, description, steps, step, disabled, onBack }: {
 }) {
   return (
     <nav className={styles.progress} aria-label={label}>
-      {description && <p className={styles.progressIntro}>{description}</p>}
       <ol>
         {steps.map((item, index) => {
           const complete = index < step;
@@ -792,8 +790,9 @@ export function EslQuoteForm({
         }}
       />
 
-      <form ref={formRef} onSubmit={(event) => void onSubmit(event)} className={styles.card} data-kind={values.kind || undefined} aria-labelledby={headingId} noValidate>
-        <StepProgress label="Etapas da cotação" description="Escolha a modalidade e siga as quatro etapas." steps={quoteSteps} step={step} disabled={status === "loading"} onBack={goToStep} />
+      <p id={`${headingId}-intro`} className={styles.formIntro}>Escolha a modalidade e siga as quatro etapas.</p>
+      <form ref={formRef} onSubmit={(event) => void onSubmit(event)} className={styles.card} data-kind={values.kind || undefined} aria-labelledby={headingId} aria-describedby={`${headingId}-intro`} noValidate>
+        <StepProgress label="Etapas da cotação" steps={quoteSteps} step={step} disabled={status === "loading"} onBack={goToStep} />
         <div key={currentStep.id} className={styles.body} data-direction={direction}>
           <header className={styles.heading}>
             <p className={sectionTitleClassName}>Etapa {step + 1} de {quoteSteps.length}</p>

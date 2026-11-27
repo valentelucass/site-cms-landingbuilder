@@ -181,7 +181,7 @@
   accent-color: var(--quote-accent);
   cursor: pointer;
 }
-.progressIntro { margin: .3rem 0 .15rem; text-align: center; color: #42566c; font-size: .85rem; }
+.formIntro { margin: 0 0 1rem; text-align: center; color: #42566c; font-size: .875rem; }
 .card input::placeholder { color: #5f7086; opacity: 1; }
 .card input:hover { border-color: #536f92; }
 .card input:focus-visible, .card textarea:focus-visible {
